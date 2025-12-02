@@ -3,7 +3,7 @@ import { requestManager } from "../context/RequestContext/RequestContext";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/";
 
 export async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const defaultHeaders = {
     "Content-Type": "application/json",

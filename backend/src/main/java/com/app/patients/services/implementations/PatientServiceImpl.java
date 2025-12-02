@@ -7,13 +7,16 @@ import org.springframework.stereotype.Service;
 
 import com.app.patients.entities.Patient;
 import com.app.patients.entities.Session;
+import com.app.patients.entities.User;
 import com.app.patients.entities.dto.DebtNotificationDTO;
 import com.app.patients.entities.dto.PatientRequestDTO;
 import com.app.patients.entities.dto.PatientResponseDTO;
 import com.app.patients.repositories.PatientRepository;
 import com.app.patients.repositories.SessionRepository;
+
 import com.app.patients.services.EmailService;
 import com.app.patients.services.PatientService;
+import com.app.patients.services.UserService;
 
 @Service
 public class PatientServiceImpl implements PatientService {
@@ -27,18 +30,9 @@ public class PatientServiceImpl implements PatientService {
     @Autowired
     private EmailService emailService;
 
-    @Override
-    public PatientResponseDTO createPatient(PatientRequestDTO dto) {
-        Patient p = new Patient();
-        p.setName(dto.getName());
-        p.setDni(dto.getDni());
-        p.setEmail(dto.getEmail());
-        p.setPhone(dto.getPhone());
-        p.setDebt(dto.getDebt());
+    @Autowired
+    private UserService userService;
 
-        Patient saved = patientRepository.save(p);
-        return toResponseDTO(saved);
-    }
 
     @Override
     public void deletePatient(Long id) {
@@ -110,15 +104,40 @@ public class PatientServiceImpl implements PatientService {
         return dto;
     }
 
-    private PatientResponseDTO toResponseDTO(Patient p) {
-        PatientResponseDTO dto = new PatientResponseDTO();
-        dto.setId(p.getId());
-        dto.setName(p.getName());
-        dto.setDni(p.getDni());
-        dto.setEmail(p.getEmail());
-        dto.setPhone(p.getPhone());
-        dto.setDebt(p.getDebt());
-        return dto;
+public List<PatientResponseDTO> getMyPatients() {
+        User authUser = userService.getAuthenticatedUser();
+        return patientRepository.findByUser(authUser)
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
+
+    public PatientResponseDTO createPatient(PatientRequestDTO dto) {
+        User authUser = userService.getAuthenticatedUser();
+
+        Patient patient = new Patient();
+        patient.setName(dto.getName());
+        patient.setDni(dto.getDni());
+        patient.setEmail(dto.getEmail());
+        patient.setPhone(dto.getPhone());
+        patient.setDebt(0.0);
+        patient.setUser(authUser);
+
+        Patient saved = patientRepository.save(patient);
+
+        return toResponseDTO(saved);
+    }
+
+    private PatientResponseDTO toResponseDTO(Patient p) {
+        return new PatientResponseDTO(
+                p.getId(),
+                p.getName(),
+                p.getDni(),
+                p.getEmail(),
+                p.getPhone(),
+                p.getDebt()
+        );
+    }
+
 }
 

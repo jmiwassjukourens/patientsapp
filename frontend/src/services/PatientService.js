@@ -1,7 +1,38 @@
-export function getPatients() {
-  return [
-  { id: 1, name: "Juan Pérez", dni: "40123456", email: "juanperez@gmail.com", phone: "11-2345-6789", debt: 1500 },
-  { id: 2, name: "María Gómez", dni: "39222333", email: "maria.gomez@gmail.com", phone: "11-5678-9012", debt: 0 },
-  { id: 3, name: "Carlos Díaz", dni: "37099876", email: "carlos.diaz@hotmail.com", phone: "11-4567-1234", debt: 300 },
-];
-} 
+import { apiFetch } from "../api/apiFetch";
+const BASE = "api/patients";
+
+export function fetchPatients() {
+  return apiFetch(`${BASE}`);
+}
+
+export function createPatient(patient) {
+  return apiFetch(`${BASE}`, {
+    method: "POST",
+    body: JSON.stringify(patient),
+  });
+}
+
+export function updatePatient(id, patient) {
+  return apiFetch(`${BASE}/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(patient),
+  });
+}
+
+export function deletePatient(id) {
+  return apiFetch(`${BASE}/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function notifyDebt(id) {
+  return apiFetch(`${BASE}/${id}/notify-debt`, {
+    method: "POST",
+  });
+}
+
+export function notifyAllPatients() {
+  return apiFetch(`${BASE}/notify-debt/all`, {
+    method: "POST",
+  });
+}

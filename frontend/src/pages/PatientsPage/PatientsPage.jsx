@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import styles from "./PatientsPage.module.css";
 import PatientsFilterBar from "../../components/PatientsFilterBar/PatientsFilterBar";
 import PatientCard from "../../components/PatientCard/PatientCard";
 import PatientFormModal from "../../components/Modals/PatientFormModal/PatientFormModal";
 import ConfirmModal from "../../components/Modals/ConfirmModal/ConfirmModal.jsx";
-import { getPatients } from "../../services/PatientService.js";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchPatients,
+  createPatient,
+  updatePatient,
+  deletePatient,
+  notifyDebt,
+  notifyAllPatients,
+} from "../../services/PatientService.js";
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState([]);
@@ -19,27 +26,47 @@ export default function PatientsPage() {
 
   const navigate = useNavigate();
 
+
   useEffect(() => {
-    const data = getPatients();
-    setPatients(data);
-    setFiltered(data);
+    loadPatients();
   }, []);
+
+  const loadPatients = async () => {
+    try {
+      const data = await fetchPatients();
+      setPatients(data);
+      setFiltered(data);
+    } catch (e) {
+      console.error("Error loading patients", e);
+      alert("❌ Error al cargar pacientes del servidor");
+    }
+  };
+
 
   useEffect(() => {
     let temp = [...patients];
+
     if (filterName.trim() !== "") {
       temp = temp.filter((p) =>
         p.name.toLowerCase().includes(filterName.toLowerCase())
       );
     }
+
     if (filterDebt) {
       temp = temp.filter((p) => p.debt > 0);
     }
+
     setFiltered(temp);
   }, [filterName, filterDebt, patients]);
 
-  const handleNotifyAll = () => {
-    alert("Notificaciones enviadas a todos los pacientes con deuda 💬");
+
+  const handleNotifyAll = async () => {
+    try {
+      await notifyAllPatients();
+      alert("📧 Notificaciones enviadas correctamente");
+    } catch (e) {
+      alert("❌ Error enviando notificaciones");
+    }
   };
 
   const handleDelete = (id) => {
@@ -48,25 +75,59 @@ export default function PatientsPage() {
     setOpenConfirm(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!patientToDelete) return;
-    setPatients((prev) => prev.filter((p) => p.id !== patientToDelete.id));
+
+    try {
+      await deletePatient(patientToDelete.id);
+      setPatients((prev) =>
+        prev.filter((p) => p.id !== patientToDelete.id)
+      );
+    } catch (e) {
+      alert("❌ Error eliminando paciente");
+    }
+
     setOpenConfirm(false);
     setPatientToDelete(null);
   };
 
-  const handleAddPatient = (newPatient) => {
-    setPatients((prev) => [...prev, newPatient]);
-    setOpenForm(false);
+
+  const handleAddPatient = async (newPatient) => {
+    try {
+      const saved = await createPatient(newPatient);
+      setPatients((prev) => [...prev, saved]);
+      setOpenForm(false);
+    } catch (e) {
+      alert("❌ Error creando paciente");
+    }
   };
 
-  const handleEditPatient = (updatedPatient) => {
-    setPatients((prev) =>
-      prev.map((p) => (p.id === updatedPatient.id ? updatedPatient : p))
-    );
-    setEditingPatient(null);
-    setOpenForm(false);
+
+  const handleEditPatient = async (updatedPatient) => {
+    try {
+      const saved = await updatePatient(updatedPatient.id, updatedPatient);
+
+      setPatients((prev) =>
+        prev.map((p) => (p.id === saved.id ? saved : p))
+      );
+
+      setEditingPatient(null);
+      setOpenForm(false);
+    } catch (e) {
+      alert("❌ Error actualizando paciente");
+    }
   };
+
+
+  const handleNotifyDebt = async (id) => {
+    try {
+      await notifyDebt(id);
+      alert("📧 Notificación enviada");
+    } catch (e) {
+      alert("❌ Error enviando notificación");
+    }
+  };
+
 
   const handleEdit = (patient) => {
     setEditingPatient(patient);
@@ -80,8 +141,11 @@ export default function PatientsPage() {
   };
 
   const handleViewHistory = (patient) => {
-    navigate(`/sesiones?paciente=${encodeURIComponent(patient.name)}`);
+    navigate(
+      `/sesiones?paciente=${encodeURIComponent(patient.name)}`
+    );
   };
+
 
   return (
     <div className={styles.pageContainer}>
@@ -98,6 +162,7 @@ export default function PatientsPage() {
         <button className={styles.notifyAllBtn} onClick={handleNotifyAll}>
           📢 Notificar a todos los pacientes con deuda
         </button>
+
         <button
           className={styles.addBtn}
           onClick={() => {
@@ -116,6 +181,7 @@ export default function PatientsPage() {
             patient={p}
             onEdit={() => handleEdit(p)}
             onDelete={() => handleDelete(p.id)}
+              onNotify={handleNotifyDebt} 
             onViewPending={() => handleViewPending(p)}
             onViewHistory={() => handleViewHistory(p)}
           />
@@ -139,7 +205,7 @@ export default function PatientsPage() {
         onClose={() => setOpenConfirm(false)}
         onConfirm={confirmDelete}
         title="Eliminar paciente"
-        message={`¿Seguro que deseas eliminar a "${patientToDelete?.name}"? Esta acción no se puede deshacer.`}
+        message={`¿Seguro que deseas eliminar a "${patientToDelete?.name}"?`}
         confirmText="Eliminar"
         cancelText="Cancelar"
         confirmColor="danger"

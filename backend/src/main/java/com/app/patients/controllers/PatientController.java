@@ -1,8 +1,11 @@
 package com.app.patients.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,13 +24,6 @@ public class PatientController {
 
     @Autowired
     private PatientService patientService;
-
-
-    // CREATE
-    @PostMapping
-    public ResponseEntity<PatientResponseDTO> createPatient(@RequestBody PatientRequestDTO dto) {
-        return ResponseEntity.ok(patientService.createPatient(dto));
-    }
 
 
     // DELETE
@@ -53,6 +49,16 @@ public class PatientController {
     public ResponseEntity<DebtNotificationDTO> notifyDebt(@PathVariable Long id) {
         DebtNotificationDTO dto = patientService.notifyDebt(id);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping
+    public List<PatientResponseDTO> getMyPatients() {
+        return patientService.getMyPatients();
+    }
+
+    @PostMapping
+    public PatientResponseDTO createPatient(@RequestBody PatientRequestDTO dto) {
+        return patientService.createPatient(dto);
     }
 }
 

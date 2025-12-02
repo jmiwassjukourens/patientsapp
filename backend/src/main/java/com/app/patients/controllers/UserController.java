@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +25,7 @@ import com.app.patients.services.UserService;
 
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080","http://localhost:5173"}, originPatterns = "*")
+
 @RestController
 @RequestMapping("/users")
 public class UserController {

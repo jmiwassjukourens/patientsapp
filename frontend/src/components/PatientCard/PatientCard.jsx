@@ -11,12 +11,14 @@ export default function PatientCard({
   patient,
   onDelete,
   onEdit,
+  onNotify,
   onViewPending,
   onViewHistory,
 }) {
-  const handleNotify = () => {
-    alert(`Notificación enviada a ${patient.name}`);
-  };
+    const handleNotify = () => {
+      onNotify(patient.id);
+    };
+
 
   const hasDebt = patient.debt > 0;
 
