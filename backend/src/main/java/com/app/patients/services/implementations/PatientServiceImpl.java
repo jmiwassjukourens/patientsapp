@@ -65,11 +65,10 @@ public class PatientServiceImpl implements PatientService {
     }
 
 
-
     @Override
     public DebtNotificationDTO notifyDebt(Long patientId) {
-        Patient patient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new ApiException(ErrorCode.PATIENT_NOT_FOUND));
+
+        Patient patient = getOwnedPatientOrThrow(patientId);
 
         List<Session> pending = sessionRepository.findPendingSessionsByPatientId(patientId);
 
@@ -188,5 +187,7 @@ public class PatientServiceImpl implements PatientService {
 
     return p;
 }
+
+
 
 }

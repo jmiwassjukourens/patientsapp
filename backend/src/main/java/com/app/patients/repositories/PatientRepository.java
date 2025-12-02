@@ -16,4 +16,5 @@ public interface PatientRepository extends CrudRepository<Patient, Long> {
     List<Patient> findByUser(User user);
 
     long countByUserId(Long userId);
+
 }

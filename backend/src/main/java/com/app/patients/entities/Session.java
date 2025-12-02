@@ -36,7 +36,6 @@ public class Session {
     @Column(nullable = false)
     private Double precio;
 
-    private String adjunto; 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
@@ -53,7 +52,6 @@ public class Session {
         this.fechaDePago = fechaDePago;
         this.estado = estado;
         this.precio = precio;
-        this.adjunto = adjunto;
         this.patient = patient;
     }
     // Getters and Setters
@@ -95,14 +93,6 @@ public class Session {
 
     public void setPrecio(Double precio) {
         this.precio = precio;
-    }
-
-    public String getAdjunto() {
-        return adjunto;
-    }
-
-    public void setAdjunto(String adjunto) {
-        this.adjunto = adjunto;
     }
 
     public Patient getPatient() {

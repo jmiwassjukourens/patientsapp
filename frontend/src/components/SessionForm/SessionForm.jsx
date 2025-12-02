@@ -87,11 +87,6 @@ function SessionForm({ initialData = {}, onSubmit, onCancel, title }) {
         />
       </div>
 
-      <div className={styles.field}>
-        <label>Adjunto (opcional)</label>
-        <input type="file" name="adjunto" onChange={handleChange} />
-      </div>
-
       <div className={styles.buttons}>
         <button type="submit" className={styles.submitBtn}>
           Guardar

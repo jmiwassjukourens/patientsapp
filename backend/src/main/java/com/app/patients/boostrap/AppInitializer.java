@@ -81,7 +81,6 @@ public class AppInitializer implements CommandLineRunner {
                 user
         );
 
-
         Session s1 = new Session();
         s1.setFecha(LocalDateTime.now().minusDays(10));
         s1.setPrecio(5000.0);
@@ -96,13 +95,18 @@ public class AppInitializer implements CommandLineRunner {
         s2.setFechaDePago(LocalDateTime.now().minusDays(4));
         s2.setPatient(p1);
 
-        p1.getSessions().add(s1);
-        p1.getSessions().add(s2);
+        Session s3 = new Session();
+        s3.setFecha(LocalDateTime.now().minusDays(2));
+        s3.setPrecio(4500.0);
+        s3.setEstado(SessionStatus.PAGADO);
+        s3.setFechaDePago(LocalDateTime.now().minusDays(1));
+        s3.setPatient(p1);
+
+        p1.getSessions().addAll(Arrays.asList(s1, s2, s3));
+        p1.setDebt(0.0);
 
 
-        // ----------------------------
-        // PACIENTE 2 — CON DEUDA
-        // ----------------------------
+
         Patient p2 = new Patient(
                 "María Gómez",
                 "87654321",
@@ -111,29 +115,28 @@ public class AppInitializer implements CommandLineRunner {
                 user
         );
 
-        // Sesión no pagada → genera deuda
-        Session s3 = new Session();
-        s3.setFecha(LocalDateTime.now().minusDays(3));
-        s3.setPrecio(6000.0);
-        s3.setEstado(SessionStatus.PENDIENTE);
-        s3.setPatient(p2);
-
         Session s4 = new Session();
-        s4.setFecha(LocalDateTime.now().minusDays(1));
+        s4.setFecha(LocalDateTime.now().minusDays(7));
         s4.setPrecio(6000.0);
         s4.setEstado(SessionStatus.PENDIENTE);
         s4.setPatient(p2);
 
-        p2.getSessions().add(s3);
-        p2.getSessions().add(s4);
+        Session s5 = new Session();
+        s5.setFecha(LocalDateTime.now().minusDays(3));
+        s5.setPrecio(6000.0);
+        s5.setEstado(SessionStatus.PENDIENTE);
+        s5.setPatient(p2);
 
-        // Deuda total del paciente
-        p2.setDebt(6000.0 + 6000.0);
+        Session s6 = new Session();
+        s6.setFecha(LocalDateTime.now().minusDays(1));
+        s6.setPrecio(6000.0);
+        s6.setEstado(SessionStatus.PENDIENTE);
+        s6.setPatient(p2);
+
+        p2.getSessions().addAll(Arrays.asList(s4, s5, s6));
+        p2.setDebt(6000.0 * 3); // 18k de deuda
 
 
-        // ----------------------------
-        // PACIENTE 3 — MIXTO
-        // ----------------------------
         Patient p3 = new Patient(
                 "Carlos Díaz",
                 "45678912",
@@ -142,30 +145,34 @@ public class AppInitializer implements CommandLineRunner {
                 user
         );
 
-        // Una sesión pagada
-        Session s5 = new Session();
-        s5.setFecha(LocalDateTime.now().minusDays(7));
-        s5.setPrecio(4000.0);
-        s5.setEstado(SessionStatus.PAGADO);
-        s5.setFechaDePago(LocalDateTime.now().minusDays(6));
-        s5.setPatient(p3);
+        Session s7 = new Session();
+        s7.setFecha(LocalDateTime.now().minusDays(12));
+        s7.setPrecio(4000.0);
+        s7.setEstado(SessionStatus.PAGADO);
+        s7.setFechaDePago(LocalDateTime.now().minusDays(11));
+        s7.setPatient(p3);
 
-        // Una sesión impaga
-        Session s6 = new Session();
-        s6.setFecha(LocalDateTime.now().minusDays(2));
-        s6.setPrecio(4000.0);
-        s6.setEstado(SessionStatus.PENDIENTE);
-        s6.setPatient(p3);
+        Session s8 = new Session();
+        s8.setFecha(LocalDateTime.now().minusDays(4));
+        s8.setPrecio(4000.0);
+        s8.setEstado(SessionStatus.PENDIENTE);
+        s8.setPatient(p3);
 
-        p3.getSessions().add(s5);
-        p3.getSessions().add(s6);
+        Session s9 = new Session();
+        s9.setFecha(LocalDateTime.now().minusDays(2));
+        s9.setPrecio(4000.0);
+        s9.setEstado(SessionStatus.PENDIENTE);
+        s9.setPatient(p3);
 
-        p3.setDebt(4000.0);
+        p3.getSessions().addAll(Arrays.asList(s7, s8, s9));
+        p3.setDebt(4000.0 * 2); // 8k de deuda
+
+
 
         patientRepository.save(p1);
         patientRepository.save(p2);
         patientRepository.save(p3);
 
-        System.out.println("Pacientes iniciales creados con sesiones y deudas.");
+        System.out.println("📌 Pacientes iniciales creados con sesiones pagadas, impagas y mixtas.");
     }
 }

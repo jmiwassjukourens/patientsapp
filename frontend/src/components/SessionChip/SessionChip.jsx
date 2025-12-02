@@ -36,7 +36,7 @@ export default function SessionChip({ session, onCancel, onMarkPaid, onReschedul
   });
 
 const handlePacienteClick = () => {
-  const nombre = encodeURIComponent(session.paciente?.nombre || "");
+  const nombre = encodeURIComponent(session.patient?.name || "");
   const fecha = new Date(session.fecha);
 
 
@@ -60,7 +60,7 @@ const handlePacienteClick = () => {
             style={{ cursor: "pointer" }}
             title="Ver sesiones de este paciente"
           >
-            {session.paciente?.nombre || "—"}
+            {session.patient?.name || "—"}
           </div>
           <div className={styles.meta}>
             <span className={styles.time}>{time}</span>

@@ -51,7 +51,7 @@ function SessionCards({ sesiones, onEdit, onDelete, onMarkAsPaid }) {
       {sesiones.map((s) => (
         <div key={s.id} className={`${styles.card} ${styles[`estado_${s.estado.toLowerCase()}`]}`}>
           <div className={styles.cardHeader}>
-            <h3 className={styles.paciente}>{s.paciente.nombre}</h3>
+            <h3 className={styles.paciente}>{s.patient.name}</h3>
             <span className={`${styles.badge} ${styles[s.estado.toLowerCase()]}`}>
               {s.estado}
             </span>
@@ -72,13 +72,6 @@ function SessionCards({ sesiones, onEdit, onDelete, onMarkAsPaid }) {
           </div>
 
           <div className={styles.cardActions}>
-            <button
-              className={`${styles.btnAttach} ${!s.adjunto ? styles.disabled : ""}`}
-              disabled={!s.adjunto}
-              onClick={() => handleDownload(s.adjunto)}
-            >
-              📎
-            </button>
 
             <button
               className={`${styles.btnPaid} ${s.fechaDePago ? styles.disabled : ""}`}
@@ -103,7 +96,7 @@ function SessionCards({ sesiones, onEdit, onDelete, onMarkAsPaid }) {
       title="⚠️ Eliminar sesión"
       message={
         selectedSession
-          ? `Estás a punto de eliminar permanentemente la sesión de ${selectedSession.paciente.nombre} 
+          ? `Estás a punto de eliminar permanentemente la sesión de ${selectedSession.patient.name} 
             con fecha y horario: ${new Date(selectedSession.fecha).toLocaleString()}.
             Toda la información adjunta (recibos, notas, pagos) se perderá.`
           : ""

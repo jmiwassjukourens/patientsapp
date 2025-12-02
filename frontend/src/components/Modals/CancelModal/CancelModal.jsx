@@ -58,9 +58,10 @@ export function CancelModal({ open, onClose, onConfirm, sesion }) {
       >
         <p style={{ fontSize: "0.95rem", color: "#333" }}>
           Estás cancelando la sesión de{" "}
-          <strong>{sesion.paciente.nombre}</strong> el{" "}
-          {new Date(sesion.fecha).toLocaleString()}.
+          <strong>{sesion?.patient?.name ?? "Paciente desconocido"}</strong> el{" "}
+          {sesion?.fecha ? new Date(sesion.fecha).toLocaleString() : ""}.
         </p>
+
 
         <TextField
           fullWidth
