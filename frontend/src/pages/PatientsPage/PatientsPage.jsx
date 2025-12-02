@@ -24,9 +24,8 @@ export default function PatientsPage() {
   const [editingPatient, setEditingPatient] = useState(null);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState(null);
+
   const toast = useToast();
-
-
   const navigate = useNavigate();
 
 
@@ -39,8 +38,9 @@ export default function PatientsPage() {
       const data = await fetchPatients();
       setPatients(data);
       setFiltered(data);
+
     } catch (e) {
-      toast.error("Error al cargar pacientes del servidor");
+      handleError(e);
     }
   };
 
@@ -62,12 +62,32 @@ export default function PatientsPage() {
   }, [filterName, filterDebt, patients]);
 
 
+  const handleError = (e) => {
+    switch (e.code) {
+      case "PATIENT_NOT_FOUND":
+        toast.error("Paciente no encontrado");
+        break;
+
+      case "DEBT_EMPTY":
+        toast.info("Este paciente no tiene deuda pendiente");
+        break;
+
+      case "DELETE_NOT_FOUND":
+        toast.error("No existe el paciente que querés eliminar");
+        break;
+
+      default:
+        toast.error(e.message || "Error inesperado");
+    }
+  };
+
+
   const handleNotifyAll = async () => {
     try {
       await notifyAllPatients();
       toast.info("Notificaciones enviadas a todos los pacientes con deuda");
     } catch (e) {
-       toast.error("Error enviando notificaciones");
+      handleError(e);
     }
   };
 
@@ -82,30 +102,28 @@ export default function PatientsPage() {
 
     try {
       await deletePatient(patientToDelete.id);
-      setPatients((prev) =>
-        prev.filter((p) => p.id !== patientToDelete.id)
-      );
-       toast.info("Se ha eliminado a " + patientToDelete.name + " correctamente" );
+
+      setPatients((prev) => prev.filter((p) => p.id !== patientToDelete.id));
+
+      toast.info(`Paciente "${patientToDelete.name}" eliminado correctamente`);
     } catch (e) {
-       toast.error("Error al eliminar paciente");
+      handleError(e);
     }
 
     setOpenConfirm(false);
     setPatientToDelete(null);
   };
 
-
   const handleAddPatient = async (newPatient) => {
     try {
       const saved = await createPatient(newPatient);
       setPatients((prev) => [...prev, saved]);
+      toast.info("Paciente creado correctamente");
       setOpenForm(false);
-       toast.info("Paciente creado correctamente");
     } catch (e) {
-       toast.error("Error al crear paciente");
+      handleError(e);
     }
   };
-
 
   const handleEditPatient = async (updatedPatient) => {
     try {
@@ -115,24 +133,22 @@ export default function PatientsPage() {
         prev.map((p) => (p.id === saved.id ? saved : p))
       );
 
+      toast.info("Paciente actualizado correctamente");
       setEditingPatient(null);
       setOpenForm(false);
-        toast.info("Paciente actualizado correctamente");
     } catch (e) {
-      toast.error("Error al editar paciente");
+      handleError(e);
     }
   };
-
 
   const handleNotifyDebt = async (id) => {
     try {
       await notifyDebt(id);
       toast.info("Notificación enviada");
     } catch (e) {
-       toast.error("Error enviando notificación");
+      handleError(e);
     }
   };
-
 
   const handleEdit = (patient) => {
     setEditingPatient(patient);
@@ -146,9 +162,7 @@ export default function PatientsPage() {
   };
 
   const handleViewHistory = (patient) => {
-    navigate(
-      `/sesiones?paciente=${encodeURIComponent(patient.name)}`
-    );
+    navigate(`/sesiones?paciente=${encodeURIComponent(patient.name)}`);
   };
 
 
@@ -186,7 +200,7 @@ export default function PatientsPage() {
             patient={p}
             onEdit={() => handleEdit(p)}
             onDelete={() => handleDelete(p.id)}
-              onNotify={handleNotifyDebt} 
+            onNotify={handleNotifyDebt}
             onViewPending={() => handleViewPending(p)}
             onViewHistory={() => handleViewHistory(p)}
           />

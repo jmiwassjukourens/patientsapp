@@ -1,7 +1,6 @@
 package com.app.patients.services;
 
 import java.util.List;
-
 import com.app.patients.entities.dto.DebtNotificationDTO;
 import com.app.patients.entities.dto.PatientRequestDTO;
 import com.app.patients.entities.dto.PatientResponseDTO;

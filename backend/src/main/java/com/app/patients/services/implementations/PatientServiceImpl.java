@@ -12,6 +12,8 @@ import com.app.patients.entities.User;
 import com.app.patients.entities.dto.DebtNotificationDTO;
 import com.app.patients.entities.dto.PatientRequestDTO;
 import com.app.patients.entities.dto.PatientResponseDTO;
+import com.app.patients.exceptions.ApiException;
+import com.app.patients.exceptions.ErrorCode;
 import com.app.patients.repositories.PatientRepository;
 import com.app.patients.repositories.SessionRepository;
 
@@ -39,13 +41,18 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public void deletePatient(Long id) {
-        patientRepository.deleteById(id);
+
+        Patient p = getOwnedPatientOrThrow(id);
+
+        patientRepository.delete(p);
     }
+
+
 
     @Override
     public PatientResponseDTO updatePatient(Long id, PatientRequestDTO dto) {
-        Patient p = patientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        Patient p = getOwnedPatientOrThrow(id);
 
         p.setName(dto.getName());
         p.setDni(dto.getDni());
@@ -57,23 +64,24 @@ public class PatientServiceImpl implements PatientService {
         return toResponseDTO(updated);
     }
 
+
+
     @Override
     public DebtNotificationDTO notifyDebt(Long patientId) {
         Patient patient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+                .orElseThrow(() -> new ApiException(ErrorCode.PATIENT_NOT_FOUND));
 
         List<Session> pending = sessionRepository.findPendingSessionsByPatientId(patientId);
 
         if (pending.isEmpty()) {
-            throw new RuntimeException("This patient has no pending debt.");
+            throw new ApiException(ErrorCode.DEBT_EMPTY);
         }
 
         Double total = pending.stream().mapToDouble(Session::getPrecio).sum();
 
-        // build email body
         StringBuilder sb = new StringBuilder();
         sb.append("Hola ").append(patient.getName()).append(",\n\n");
-        sb.append("Esto es un recordatorio automatico. Aún tiene sesiones pendientes de pago:\n\n");
+        sb.append("Esto es un recordatorio automático. Aún tiene sesiones pendientes de pago:\n\n");
 
         for (Session s : pending) {
             sb.append("- Fecha sesión: ")
@@ -86,10 +94,8 @@ public class PatientServiceImpl implements PatientService {
         sb.append("\nTotal: $").append(total);
         sb.append("\n\nGracias.");
 
-        // send email
-        emailService.sendEmail(patient.getEmail(), "Sesiones Pendientes de pago", sb.toString());
+        emailService.sendEmail(patient.getEmail(), "Sesiones pendientes de pago", sb.toString());
 
-        // build DTO response
         DebtNotificationDTO dto = new DebtNotificationDTO();
         dto.setPatientName(patient.getName());
         dto.setPatientEmail(patient.getEmail());
@@ -107,13 +113,39 @@ public class PatientServiceImpl implements PatientService {
         return dto;
     }
 
-public List<PatientResponseDTO> getMyPatients() {
+
+    @Override
+    @Transactional
+    public List<DebtNotificationDTO> notifyDebtToAll() {
+        User user = userService.getAuthenticatedUser();
+
+        List<Patient> patients = patientRepository.findByUser(user);
+        List<DebtNotificationDTO> results = new ArrayList<>();
+
+        for (Patient p : patients) {
+            List<Session> pending = sessionRepository.findPendingSessionsByPatientId(p.getId());
+
+            if (!pending.isEmpty()) {
+                results.add(notifyDebt(p.getId()));
+            }
+        }
+
+        if (results.isEmpty()) {
+            throw new ApiException(ErrorCode.USER_HAS_NO_DEBT);
+        }
+
+        return results;
+    }
+
+
+    public List<PatientResponseDTO> getMyPatients() {
         User authUser = userService.getAuthenticatedUser();
         return patientRepository.findByUser(authUser)
                 .stream()
                 .map(this::toResponseDTO)
                 .toList();
     }
+
 
     public PatientResponseDTO createPatient(PatientRequestDTO dto) {
         User authUser = userService.getAuthenticatedUser();
@@ -131,6 +163,7 @@ public List<PatientResponseDTO> getMyPatients() {
         return toResponseDTO(saved);
     }
 
+
     private PatientResponseDTO toResponseDTO(Patient p) {
         return new PatientResponseDTO(
                 p.getId(),
@@ -142,32 +175,18 @@ public List<PatientResponseDTO> getMyPatients() {
         );
     }
 
-    @Override
-    @Transactional
-    public List<DebtNotificationDTO> notifyDebtToAll() {
+    
+    private Patient getOwnedPatientOrThrow(Long patientId) {
+    User authUser = userService.getAuthenticatedUser();
 
-        User user = userService.getAuthenticatedUser();  
+    Patient p = patientRepository.findById(patientId)
+            .orElseThrow(() -> new ApiException(ErrorCode.PATIENT_NOT_FOUND));
 
-        List<Patient> patients = patientRepository.findByUser(user);
-
-        List<DebtNotificationDTO> results = new ArrayList<>();
-
-        for (Patient p : patients) {
-
-            List<Session> pending = sessionRepository.findPendingSessionsByPatientId(p.getId());
-
-            if (!pending.isEmpty()) {
-                DebtNotificationDTO dto = notifyDebt(p.getId());
-                results.add(dto);
-            }
-        }
-
-        if (results.isEmpty()) {
-            throw new RuntimeException("No patients with pending debt found.");
-        }
-
-        return results;
+    if (!p.getUser().getId().equals(authUser.getId())) {
+        throw new ApiException(ErrorCode.UNAUTHORIZED_PATIENT_ACCESS);
     }
 
+    return p;
 }
 
+}
