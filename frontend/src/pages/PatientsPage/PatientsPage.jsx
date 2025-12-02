@@ -13,6 +13,7 @@ import {
   notifyDebt,
   notifyAllPatients,
 } from "../../services/PatientService.js";
+import { useToast } from "../../hooks/useToast.jsx";
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState([]);
@@ -23,6 +24,8 @@ export default function PatientsPage() {
   const [editingPatient, setEditingPatient] = useState(null);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState(null);
+  const toast = useToast();
+
 
   const navigate = useNavigate();
 
@@ -37,8 +40,7 @@ export default function PatientsPage() {
       setPatients(data);
       setFiltered(data);
     } catch (e) {
-      console.error("Error loading patients", e);
-      alert("❌ Error al cargar pacientes del servidor");
+      toast.error("Error al cargar pacientes del servidor");
     }
   };
 
@@ -63,9 +65,9 @@ export default function PatientsPage() {
   const handleNotifyAll = async () => {
     try {
       await notifyAllPatients();
-      alert("📧 Notificaciones enviadas correctamente");
+      toast.info("Notificaciones enviadas a todos los pacientes con deuda");
     } catch (e) {
-      alert("❌ Error enviando notificaciones");
+       toast.error("Error enviando notificaciones");
     }
   };
 
@@ -83,8 +85,9 @@ export default function PatientsPage() {
       setPatients((prev) =>
         prev.filter((p) => p.id !== patientToDelete.id)
       );
+       toast.info("Se ha eliminado a " + patientToDelete.name + " correctamente" );
     } catch (e) {
-      alert("❌ Error eliminando paciente");
+       toast.error("Error al eliminar paciente");
     }
 
     setOpenConfirm(false);
@@ -97,8 +100,9 @@ export default function PatientsPage() {
       const saved = await createPatient(newPatient);
       setPatients((prev) => [...prev, saved]);
       setOpenForm(false);
+       toast.info("Paciente creado correctamente");
     } catch (e) {
-      alert("❌ Error creando paciente");
+       toast.error("Error al crear paciente");
     }
   };
 
@@ -113,8 +117,9 @@ export default function PatientsPage() {
 
       setEditingPatient(null);
       setOpenForm(false);
+        toast.info("Paciente actualizado correctamente");
     } catch (e) {
-      alert("❌ Error actualizando paciente");
+      toast.error("Error al editar paciente");
     }
   };
 
@@ -122,9 +127,9 @@ export default function PatientsPage() {
   const handleNotifyDebt = async (id) => {
     try {
       await notifyDebt(id);
-      alert("📧 Notificación enviada");
+      toast.info("Notificación enviada");
     } catch (e) {
-      alert("❌ Error enviando notificación");
+       toast.error("Error enviando notificación");
     }
   };
 
