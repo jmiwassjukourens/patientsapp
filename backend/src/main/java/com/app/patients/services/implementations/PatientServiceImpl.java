@@ -1,5 +1,6 @@
 package com.app.patients.services.implementations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import com.app.patients.repositories.SessionRepository;
 import com.app.patients.services.EmailService;
 import com.app.patients.services.PatientService;
 import com.app.patients.services.UserService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class PatientServiceImpl implements PatientService {
@@ -137,6 +140,33 @@ public List<PatientResponseDTO> getMyPatients() {
                 p.getPhone(),
                 p.getDebt()
         );
+    }
+
+    @Override
+    @Transactional
+    public List<DebtNotificationDTO> notifyDebtToAll() {
+
+        User user = userService.getAuthenticatedUser();  
+
+        List<Patient> patients = patientRepository.findByUser(user);
+
+        List<DebtNotificationDTO> results = new ArrayList<>();
+
+        for (Patient p : patients) {
+
+            List<Session> pending = sessionRepository.findPendingSessionsByPatientId(p.getId());
+
+            if (!pending.isEmpty()) {
+                DebtNotificationDTO dto = notifyDebt(p.getId());
+                results.add(dto);
+            }
+        }
+
+        if (results.isEmpty()) {
+            throw new RuntimeException("No patients with pending debt found.");
+        }
+
+        return results;
     }
 
 }

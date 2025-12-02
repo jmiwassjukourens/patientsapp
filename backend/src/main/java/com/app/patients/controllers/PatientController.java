@@ -60,5 +60,12 @@ public class PatientController {
     public PatientResponseDTO createPatient(@RequestBody PatientRequestDTO dto) {
         return patientService.createPatient(dto);
     }
+
+    @PostMapping("/notify-debt/all")
+    public ResponseEntity<List<DebtNotificationDTO>> notifyDebtToAll() {
+        List<DebtNotificationDTO> result = patientService.notifyDebtToAll();
+        return ResponseEntity.ok(result);
+    }
+
 }
 

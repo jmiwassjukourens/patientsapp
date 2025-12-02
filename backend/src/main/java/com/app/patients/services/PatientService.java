@@ -18,5 +18,8 @@ public interface PatientService {
 
     List<PatientResponseDTO> getMyPatients();
 
+    List<DebtNotificationDTO> notifyDebtToAll();
+
+
 
 }
