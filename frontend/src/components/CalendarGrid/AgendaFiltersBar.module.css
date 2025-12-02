@@ -1,0 +1,134 @@
+.filtrosWrapper {
+
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 0.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.statusText {
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.toggleBtn {
+  background-color: #ff914d;
+  color: #fef8f0;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.25s ease;
+}
+
+.toggleBtn.active {
+  background-color: #ff7b2f;
+}
+
+.toggleBtn:hover {
+  transform: scale(1.05);
+}
+
+.filtrosContenido {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dateRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+input[type="date"] {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.btnFiltrar {
+  background-color: #ff914d;
+  color: #fef8f0;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.btnFiltrar:hover {
+  background-color: #ff7b2f;
+  transform: translateY(-2px);
+}
+
+.atajosTiempo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+
+}
+
+@media (max-width: 680px) {
+  .atajosTiempo {
+    justify-content: space-between;
+  }
+  .atajosTiempo button {
+    width: 40vw;
+
+}
+}
+
+
+.atajosTiempo button {
+  background-color: #fff0e6;
+  color: #ff914d;
+  border: 1px solid #ffc27c;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.atajosTiempo button:hover {
+  background-color: #ff914d;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+input{
+  background-color:#fef8f0 !important;
+}
+
+

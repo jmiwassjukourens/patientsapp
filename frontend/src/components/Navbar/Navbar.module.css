@@ -1,0 +1,176 @@
+.header {
+  background-color: #FF8C42;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 1.2rem;
+  box-shadow: 0 2px 8px rgba(255, 140, 66, 0.4);
+}
+
+.logo {
+  width: 10vw;
+  transition: transform 0.3s ease;
+  padding: 1.5rem;
+}
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.menuToggle {
+  display: none;
+  background: none;
+  color: #FFFFFF;
+  font-size: 2rem;
+  border: none;
+  cursor: pointer;
+}
+
+.navList {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  z-index: 1000000;
+}
+
+.navList li a,
+.logout {
+  color: #FFFFFF;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.navList li a::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: #FFEEDB;
+  transition: width 0.3s ease-in-out;
+  border-radius: 2px;
+}
+
+.navList li a:hover::after {
+  width: 100%;
+}
+
+.navList li a:hover,
+.logout:hover {
+  color: #FFEEDB;
+}
+
+.logout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+
+.dropdown {
+  position: relative;
+}
+
+.dropdownButton {
+  background: none;
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #FF8C42;
+  list-style: none;
+  padding: 0.5rem 0;
+  margin: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 140, 66, 0.4);
+  border-radius: 6px;
+  min-width: 180px;
+}
+
+.submenuOpen {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.submenu li a {
+  display: block;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+}
+
+.submenu li a:hover {
+  background-color: #FF9C5C;
+}
+
+
+@media (max-width: 768px) {
+  .navList {
+    flex-direction: column;
+    position: absolute;
+    background: #FF8C42;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    max-height: 0;
+    padding: 0 1rem;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  }
+
+  .active .navList {
+    max-height: 500px;
+    padding: 1rem;
+    opacity: 1;
+  }
+
+  .menuToggle {
+    display: block;
+  }
+
+  .logo {
+    width: 40vw;
+    margin-left: -2vw;
+  }
+}
+
+
+.notificationBadge {
+  background: #ef5350;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 7px;
+  font-size: 0.8rem;
+  animation: pulse 1.6s infinite;
+  box-shadow: 0 0 0 rgba(239, 83, 80, 0.6);
+  transition: transform 0.2s ease;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.6);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 8px rgba(239, 83, 80, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 83, 80, 0);
+  }
+}

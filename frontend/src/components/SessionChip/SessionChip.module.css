@@ -1,0 +1,100 @@
+.chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: #fef8f0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 145, 77, 0.2); }
+  50% { box-shadow: 0 0 18px rgba(255, 145, 77, 0.4); }
+}
+
+
+.left {
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #333;
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0%;
+  height: 2px;
+  background-color: #cc6600; 
+  transition: width 0.4s ease;
+}
+
+
+.name:hover {
+  color: #cc6600;
+}
+
+.name:hover::after {
+  width: 100%;
+}
+
+
+.meta {
+  display: flex;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #666;
+}
+
+
+.actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.payBtn,
+.delBtn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.payBtn:hover { color: #388e3c; transform: scale(1.05); }
+.delBtn:hover { color: #d32f2f; transform: scale(1.05); }
+
+.payBtn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.cancelBtn:hover {
+  color: #ef5350;
+  transform: scale(1.1);
+}
+

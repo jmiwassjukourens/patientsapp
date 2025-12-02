@@ -1,0 +1,131 @@
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wrapper {
+  padding: 1.2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeInUp 0.6s ease-out;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.titleBlock h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.subtitle:hover{
+    color: #333;
+}
+
+.controls {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.rangeLabel {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.rangeLabel input[type="date"] {
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.addBtn {
+  background-color: #ff914d;
+  color: white;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.15s ease;
+}
+
+.addBtn:hover {
+  transform: translateY(-2px);
+  background-color: #ff7b2f;
+}
+
+@media (max-width: 680px) {
+  .controls {
+    width: 100%;
+    justify-content: stretch;
+    gap: 8px;
+  }
+  .rangeLabel {
+    flex: 1;
+  }
+  .addBtn {
+    flex: 1;
+  }
+}
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  position: relative;
+  display: inline-block;
+  background-image: linear-gradient(to right, #ff914d 0%, #ff914d 100%);
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  background-position: bottom left;
+  transition: background-size 0.4s ease, color 0.4s ease;
+  z-index: 1;
+}
+
+.title:hover {
+  color: #ff914d;
+  background-size: 100% 1px;
+}
+
+.toggleActionsBtn {
+  background-color: #fff5ec;
+  border: 1px solid #ff914d;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ff914d;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(255, 145, 77, 0.2);
+  margin-top: 2vh;
+}
+
+.toggleActionsBtn:hover {
+  background-color: #ff914d;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 145, 77, 0.3);
+}

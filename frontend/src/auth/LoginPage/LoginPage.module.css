@@ -1,0 +1,139 @@
+.container {
+  display: flex;
+  height: 90vh;
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+  background-color: #FDFCFB;
+}
+
+.left {
+  flex: 1;
+  background-color: #FFEEDB;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  width: 55%;
+  max-width: 320px;
+  height: auto;
+  filter: drop-shadow(0 4px 8px rgba(255, 140, 66, 0.4));
+}
+
+.right {
+  flex: 1;
+  background: linear-gradient(135deg, #FF8C42, #B9B4C7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  max-width: 320px;
+  background-color: #FFFFFF;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.25);
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #2E2C2C;
+  font-weight: 600;
+}
+
+.input {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #CCC;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #FFF8F2;
+  color: #2E2C2C;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FF8C42;
+  box-shadow: 0 0 4px rgba(255, 140, 66, 0.6);
+}
+
+.button {
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #FF8C42, #FFAE63);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.button:hover {
+  background: linear-gradient(135deg, #FFAE63, #FF8C42);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left {
+    height: 35vh;
+  }
+
+  .logo {
+    width: 35%;
+  }
+
+  .right {
+    height: 65vh;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .left {
+    background-color: #2E2C2C;
+  }
+
+  .right {
+    background: linear-gradient(135deg, #B46B2A, #3B2F3F);
+  }
+
+  .form {
+    background-color: #3B2F3F;
+    box-shadow: 0 4px 15px rgba(255, 140, 66, 0.15);
+  }
+
+  .title {
+    color: #FFEEDB;
+  }
+
+  .input {
+    background-color: #4A3E4A;
+    border: 1px solid #6E6172;
+    color: #FFEEDB;
+  }
+
+  .input:focus {
+    border-color: #FF8C42;
+    box-shadow: 0 0 4px rgba(255, 140, 66, 0.8);
+  }
+
+  .button {
+    background: linear-gradient(135deg, #FF8C42, #B46B2A);
+  }
+
+  .button:hover {
+    background: linear-gradient(135deg, #B46B2A, #FF8C42);
+  }
+}
+
+
