@@ -4,12 +4,10 @@ import styles from "./SessionForm.module.css";
 
 function SessionForm({ initialData = {}, onSubmit, onCancel, title }) {
   const [formData, setFormData] = useState({
-    paciente: initialData.paciente?.nombre || "",
     fecha: initialData.fecha || "",
     fechaDePago: initialData.fechaDePago || "",
     estado: initialData.estado || "Pendiente",
-    precio: initialData.precio || "",
-    adjunto: null,
+    precio: initialData.precio || ""
   });
 
   const handleChange = (e) => {
@@ -29,16 +27,6 @@ function SessionForm({ initialData = {}, onSubmit, onCancel, title }) {
     <form className={styles.form} onSubmit={handleSubmit}>
       <h2 className={styles.title}>{title}</h2>
 
-      <div className={styles.field}>
-        <label>Nombre del Paciente</label>
-        <input
-          type="text"
-          name="paciente"
-          value={formData.paciente}
-          onChange={handleChange}
-          required
-        />
-      </div>
 
       <div className={styles.field}>
         <label>Fecha de Sesión</label>

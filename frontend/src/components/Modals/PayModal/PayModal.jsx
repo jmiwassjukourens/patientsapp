@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -7,17 +7,32 @@ import {
   TextField,
   Button,
 } from "@mui/material";
+import { useToast } from "../../../hooks/useToast.jsx";
+import { backendISOToInputLocal, inputLocalToBackendLocalDateTime } from "../../../utils/dateUtils.js";
 
 export function PayModal({ open, onClose, onConfirm, sesion }) {
-  const [fechaPago, setFechaPago] = useState("");
-  const [monto, setMonto] = useState(sesion?.precio || "");
+
+  const [fechaPago, setFechaPago] = useState(() => backendISOToInputLocal(sesion?.fechaDePago || ""));
+  const [monto, setMonto] = useState(sesion?.precio ?? "");
+
+  const toast = useToast();
+
+
+
+  useEffect(() => {
+    setFechaPago(backendISOToInputLocal(sesion?.fechaDePago || ""));
+    setMonto(sesion?.precio ?? "");
+  }, [sesion]);
 
   const handleConfirm = () => {
     if (!fechaPago) {
-      alert("Por favor ingresá una fecha de pago.");
+      toast.error("Por favor ingresá una fecha de pago.");
       return;
     }
-    onConfirm({ fechaPago, monto });
+
+    const backendFecha = inputLocalToBackendLocalDateTime(fechaPago);
+    onConfirm({ fechaPago: backendFecha, monto });
+
   };
 
   return (
@@ -56,10 +71,10 @@ export function PayModal({ open, onClose, onConfirm, sesion }) {
           gap: "12px",
         }}
       >
-        <p style={{ fontSize: "0.95rem", color: "#333", marginBottom: "8px" }}>
+        <p style={{ margin: 0 }}>
           Vas a registrar el pago de la sesión con{" "}
-          <strong>{sesion?.paciente?.nombre}</strong> el{" "}
-          <strong>{new Date(sesion?.fecha).toLocaleString()}</strong>.
+          <strong>{sesion?.patient?.name ?? sesion?.paciente?.nombre ?? "—"}</strong> el{" "}
+          <strong>{sesion?.fecha ? new Date(sesion.fecha).toLocaleString() : "—"}</strong>.
         </p>
 
         <TextField
@@ -70,6 +85,7 @@ export function PayModal({ open, onClose, onConfirm, sesion }) {
           fullWidth
           margin="dense"
           InputLabelProps={{ shrink: true }}
+          inputProps={{ /* pone autoFocus en apertura para accesibilidad */ autoFocus: true }}
         />
 
         <TextField

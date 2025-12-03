@@ -14,9 +14,7 @@ const handleSubmit = (data) => {
     fecha: data.fecha,
     fechaDePago: data.fechaDePago || null,
     estado: data.estado,
-    paciente: { nombre: data.paciente },
-    precio: Number(data.precio),
-    adjunto: data.adjunto ? data.adjunto.name : sesion.adjunto,
+    precio: Number(data.precio)
   };
 
   onUpdate(sesion.id, sesionEditada); 

@@ -29,18 +29,11 @@ function SessionCards({ sesiones, onEdit, onDelete, onMarkAsPaid }) {
   };
 
 
-  const handleConfirmPay = (data) => {
-    const fechaISO = new Date(data.fechaPago).toISOString();
-    onMarkAsPaid(selectedSession.id, fechaISO);
-    setOpenPay(false);
-    setSelectedSession(null);
-  };
-
-
-  const handleDownload = (adjunto) => {
-    if (!adjunto) return;
-    alert(`Descargando archivo: ${adjunto}`);
-  };
+const handleConfirmPay = (data) => {
+  onMarkAsPaid(selectedSession.id, data.fechaPago);
+  setOpenPay(false);
+  setSelectedSession(null);
+};
 
   return (
     <div className={styles.cardsContainer}>
@@ -76,7 +69,7 @@ function SessionCards({ sesiones, onEdit, onDelete, onMarkAsPaid }) {
             <button
               className={`${styles.btnPaid} ${s.fechaDePago ? styles.disabled : ""}`}
               disabled={!!s.fechaDePago}
-              onClick={() => handleOpenPay(s)}
+              onClick={(e) => { e.currentTarget.blur(); handleOpenPay(s); }}
             >
               💰
             </button>

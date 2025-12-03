@@ -6,7 +6,8 @@ import NewSessionButton from "../../components/NewSessionButton/NewSessionButton
 import FiltersBar from "../../components/FiltersBar/FiltersBar";
 import EditSesionModal from "../../components/Modals/EditSesionModal/EditSesionModal"; 
 import SessionModal from "../../components/Modals/SessionModal/SessionModal"; 
-import { getSessions, addSession, deleteSession, updateSession } from "../../services/sessionService";
+import { getSessions, updateSession, deleteSession, markAsPaid } from "../../services/sessionService";
+import { useToast } from "../../hooks/useToast.jsx";
  
 function SesionesPage() {
   const [sesiones, setSesiones] = useState([]);
@@ -14,6 +15,7 @@ function SesionesPage() {
   const [view, setView] = useState("list");
   const [selectedSesion, setSelectedSesion] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const toast = useToast();
 
   const [filtros, setFiltros] = useState({
     estado: "",
@@ -80,13 +82,16 @@ function SesionesPage() {
     setSesiones((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const handleMarkAsPaid = async (id) => {
-    const actualizada = await markAsPaid(id);
+const handleMarkAsPaid = async (id, fechaDePago = null) => {
+  try {
+    const actualizada = await markAsPaid(id, fechaDePago);
+    setSesiones((prev) => prev.map((s) => (s.id === id ? actualizada : s)));
+    toast.info("Sesión actualizada correctamente:");
+  } catch (err) {
+    toast.error("Error marcando como pagado");
 
-    setSesiones((prev) =>
-      prev.map((s) => (s.id === id ? actualizada : s))
-    );
-  };
+  }
+};
 
   const handleUpdate = async (id, updatedData) => {
     const actualizada = await updateSession(id, updatedData);
@@ -98,25 +103,22 @@ function SesionesPage() {
     setView("list");
   };
 
-  const handleCreate = async (data) => {
-    try {
-      let nuevas = [];
 
-      if (Array.isArray(data)) {
-        nuevas = await Promise.all(data.map((s) => addSession(s)));
-      } else {
-        const nueva = await addSession(data);
-        nuevas.push(nueva);
-      }
+    const handleCreateSingle = async (payload) => {
+    const pid = payload.patientId;
+    await addSessionForPatient(pid, payload);
 
-      setSesiones((prev) => [...prev, ...nuevas]);
-      handleFilterChange(filtros);
-      setShowModal(false);
+    const data = await getSessions();
+    setSesiones(data);
+  };
 
-    } catch (err) {
-      console.error("Error al crear sesión:", err);
-      alert("Hubo un error al crear la sesión");
-    }
+  const handleCreatePeriodic = async ({ basePayload, periodic, sesiones }) => {
+    const pid = basePayload.patientId ;
+
+    await addPeriodicSessionsForPatient(pid, { basePayload, periodic, sesiones });
+
+    const data = await getSessions();
+    setSesiones(data);
   };
 
   const sesionesFiltradas = sesiones.filter((s) => {
@@ -125,7 +127,7 @@ function SesionesPage() {
     const fechaHastaObj = filtros.fechaHasta ? new Date(filtros.fechaHasta) : null;
 
     const matchEstado = !filtros.estado || s.estado === filtros.estado;
-    const matchBusqueda = !filtros.busqueda || s.paciente.nombre.toLowerCase().includes(filtros.busqueda.toLowerCase());
+    const matchBusqueda = !filtros.busqueda || s.patient.name.toLowerCase().includes(filtros.busqueda.toLowerCase());
     const matchFechaSesion =
       (!fechaDesdeObj || fechaSesion >= fechaDesdeObj) &&
       (!fechaHastaObj || fechaSesion <= fechaHastaObj);
@@ -195,7 +197,8 @@ function SesionesPage() {
       {showModal && (
         <SessionModal
           onClose={() => setShowModal(false)}
-          onSave={handleCreate}
+          onSaveSingle={handleCreateSingle}
+          onSavePeriodic={handleCreatePeriodic}
         />
       )}
     </div>

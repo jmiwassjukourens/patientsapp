@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getSessions, addSession, deleteSession, updateSession } from "../../services/sessionService";
+import { getSessions, addSessionForPatient,addPeriodicSessionsForPatient, deleteSession, updateSession } from "../../services/sessionService";
 import CalendarGrid from "../../components/CalendarGrid/CalendarGrid";
 import AgendaFilterBar from "../../components/CalendarGrid/AgendaFiltersBar";
 import SessionModal from "../../components/Modals/SessionModal/SessionModal";
@@ -31,12 +31,12 @@ export default function AgendaPage() {
     if (Array.isArray(payload)) {
       const nuevas = [];
       for (const sesion of payload) {
-        const newS = await addSession(sesion);
+        const newS = await addSessionForPatient(sesion);
         nuevas.push(newS);
       }
       setSessions((prev) => [...prev, ...nuevas]);
     } else {
-      const newS = await addSession(payload);
+      const newS = await addSessionForPatient(payload);
       setSessions((prev) => [...prev, newS]);
     }
     setModalOpen(false);

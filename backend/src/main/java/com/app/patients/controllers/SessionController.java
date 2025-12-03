@@ -1,6 +1,7 @@
 package com.app.patients.controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,12 +40,16 @@ public class SessionController {
     }
 
     @PutMapping("/{id}/paid")
-    public SessionDTO markAsPaid(@PathVariable Long id) {
-        return sessionService.markAsPaid(id);
+    public SessionDTO markAsPaid(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
+        String fechaDePagoStr = body != null ? body.get("fechaDePago") : null;
+        return sessionService.markAsPaid(id, fechaDePagoStr);
     }
+
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         sessionService.deleteSession(id);
     }
+
+
 }

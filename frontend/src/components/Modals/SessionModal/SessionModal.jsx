@@ -1,62 +1,170 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import styles from "./SessionModal.module.css";
-export default function SessionModal({ defaultDate, onClose, onSave }) {
-  const defaultDateTime = defaultDate ? defaultDate + "T09:00" : "";
+import {
+  backendISOToInputLocal,
+  inputLocalToBackendLocalDateTime,
+  inputLocalToDate,
+} from "../../../utils/dateUtils.js";
 
-  const endOfYear = new Date(new Date().getFullYear(), 11, 31)
-    .toISOString()
-    .slice(0, 10);
 
-  const [fecha, setFecha] = useState(defaultDateTime || "");
-  const [nombre, setNombre] = useState("");
-  const [precio, setPrecio] = useState("");
-  const [adjunto, setAdjunto] = useState("");
-  const [recurrente, setRecurrente] = useState(false);
-  const [diaSemana, setDiaSemana] = useState("1");
-  const [fechaLimite, setFechaLimite] = useState(endOfYear);
+export default function SessionModal({
+  sesion = null,
+  onSaveSingle,
+  onSavePeriodic,
+  onCancel,
+}) {
 
-  const handleSubmit = (e) => {
+  const [fecha, setFecha] = useState(() => backendISOToInputLocal(sesion?.fecha || ""));
+  const [fechaDePago, setFechaDePago] = useState(() =>
+    backendISOToInputLocal(sesion?.fechaDePago || "")
+  );
+  const [precio, setPrecio] = useState(sesion?.precio ?? "");
+  const [estado, setEstado] = useState(sesion?.estado ?? "PENDIENTE");
+
+
+  const [nombre, setNombre] = useState(sesion?.patient?.name ?? sesion?.paciente?.nombre ?? "");
+  const [patientId, setPatientId] = useState(sesion?.patient?.id ?? sesion?.patientId ?? null);
+
+
+  const [adjunto, setAdjunto] = useState(sesion?.adjunto ?? null);
+
+
+  const [recurrente, setRecurrente] = useState(!!sesion?.periodic);
+  const [diaSemana, setDiaSemana] = useState(
+    sesion?.periodic?.dayOfWeek ? dayOfWeekToNumber(sesion.periodic.dayOfWeek) : "1"
+  ); 
+  const [fechaLimite, setFechaLimite] = useState(sesion?.periodic?.endDate ?? "");
+
+
+  useEffect(() => {
+    setFecha(backendISOToInputLocal(sesion?.fecha || ""));
+    setFechaDePago(backendISOToInputLocal(sesion?.fechaDePago || ""));
+    setPrecio(sesion?.precio ?? "");
+    setEstado(sesion?.estado ?? "PENDIENTE");
+    setNombre(sesion?.patient?.name ?? sesion?.paciente?.nombre ?? "");
+    setPatientId(sesion?.patient?.id ?? sesion?.patientId ?? null);
+    setAdjunto(sesion?.adjunto ?? null);
+    setRecurrente(!!sesion?.periodic);
+    setDiaSemana(sesion?.periodic?.dayOfWeek ? dayOfWeekToNumber(sesion.periodic.dayOfWeek) : "1");
+    setFechaLimite(sesion?.periodic?.endDate ?? "");
+  }, [sesion]);
+
+  function dayOfWeekToNumber(day) {
+    if (!day) return "1";
+    const map = {
+      SUNDAY: "0",
+      MONDAY: "1",
+      TUESDAY: "2",
+      WEDNESDAY: "3",
+      THURSDAY: "4",
+      FRIDAY: "5",
+      SATURDAY: "6",
+    };
+    return map[day.toUpperCase()] ?? "1";
+  }
+
+  function numberToDayOfWeek(num) {
+    const map = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    return map[Number(num) % 7];
+  }
+
+
+  function generarSesionesRecurrentes(basePayload, diaSemanaNum, fechaLimiteStr) {
+    const sesiones = [];
+
+    const baseDate = new Date(basePayload.fecha.replace(" ", "T"));
+    const limite = new Date(fechaLimiteStr); 
+
+    let fechaActual = new Date(baseDate);
+    while (fechaActual.getDay() !== Number(diaSemanaNum)) {
+      fechaActual.setDate(fechaActual.getDate() + 1);
+    }
+
+    while (fechaActual <= limite) {
+
+      const yyyy = fechaActual.getFullYear();
+      const mm = String(fechaActual.getMonth() + 1).padStart(2, "0");
+      const dd = String(fechaActual.getDate()).padStart(2, "0");
+      const hh = String(baseDate.getHours()).padStart(2, "0");
+      const min = String(baseDate.getMinutes()).padStart(2, "0");
+
+  
+      const fechaStr = `${yyyy}-${mm}-${dd}T${hh}:${min}:00`;
+
+      sesiones.push({
+        ...basePayload,
+        fecha: fechaStr,
+      });
+
+   
+      fechaActual.setDate(fechaActual.getDate() + 7);
+    }
+
+    return sesiones;
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!fecha || !nombre) {
-      alert("Completá fecha y nombre del paciente");
+
+    if (!fecha || (!patientId && !nombre)) {
+      alert("Completá la fecha y el paciente (ID o nombre).");
       return;
     }
 
-    const basePayload = {
-      fecha: new Date(fecha).toISOString(),
-      fechaDePago: null,
-      estado: "Pendiente",
-      paciente: { nombre },
+
+    const payloadBase = {
+      fecha: inputLocalToBackendLocalDateTime(fecha), 
+      fechaDePago: fechaDePago ? inputLocalToBackendLocalDateTime(fechaDePago) : null,
+      estado: estado ?? "PENDIENTE",
       precio: Number(precio) || 0,
+   
+      patientId: patientId ?? undefined,
+      patient: patientId ? undefined : { name: nombre },
       adjunto: adjunto || null,
     };
 
-    if (!recurrente) {
-      onSave(basePayload);
-      return;
+    try {
+      if (!recurrente) {
+    
+        if (!onSave) throw new Error("onSave no definido");
+        await onSaveSingle(payloadBase);
+      } else {
+     
+        if (!fechaLimite) {
+          alert("Seleccioná una fecha límite para la recurrencia");
+          return;
+        }
+        if (!onSavePeriodic) throw new Error("onSavePeriodic no definido");
+        const sesiones = generarSesionesRecurrentes(payloadBase, diaSemana, fechaLimite);
+        await onSavePeriodic({ periodic: {
+          frequency: "WEEKLY",
+          every: 1,
+          dayOfWeek: numberToDayOfWeek(diaSemana),
+          endDate: fechaLimite
+        }, basePayload, sesiones });
+      
+      }
+
+   
+      if (onCancel) onCancel();
+    } catch (err) {
+      console.error("Error al guardar sesión:", err);
+      alert("Hubo un error al guardar la sesión.");
     }
-
-    if (!fechaLimite) {
-      alert("Seleccioná una fecha límite para la recurrencia");
-      return;
-    }
-
-    const sesiones = generarSesionesRecurrentes(
-      basePayload,
-      Number(diaSemana),
-      fechaLimite
-    );
-
-    onSave(sesiones);
   };
 
   return (
     <div className={styles.backdrop}>
-      <div className={styles.modal}>
+      <div className={styles.modal} role="dialog" aria-modal="true">
         <div className={styles.header}>
-          <h3>🗓️ Nueva sesión</h3>
-          <button className={styles.closeBtn} onClick={onClose}>
+          <h3>{sesion ? "✏️ Editar sesión" : "🗓️ Nueva sesión"}</h3>
+          <button
+            className={styles.closeBtn}
+            onClick={() => (onCancel ? onCancel() : null)}
+            aria-label="Cerrar"
+          >
             ✖
           </button>
         </div>
@@ -69,6 +177,7 @@ export default function SessionModal({ defaultDate, onClose, onSave }) {
                 type="datetime-local"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
+                required
               />
             </label>
 
@@ -78,6 +187,7 @@ export default function SessionModal({ defaultDate, onClose, onSave }) {
                 type="number"
                 value={precio}
                 onChange={(e) => setPrecio(e.target.value)}
+                min="0"
               />
             </label>
           </div>
@@ -91,6 +201,7 @@ export default function SessionModal({ defaultDate, onClose, onSave }) {
               placeholder="Ej. Ana López"
             />
           </label>
+
           <div className={styles.divider} />
 
           <label className={styles.checkboxLabel}>
@@ -99,17 +210,14 @@ export default function SessionModal({ defaultDate, onClose, onSave }) {
               checked={recurrente}
               onChange={(e) => setRecurrente(e.target.checked)}
             />
-            Crear periódicamente
+            Crear periódicamente (se generarán sesiones semanales)
           </label>
 
           {recurrente && (
             <div className={styles.recurrenceBox}>
               <label>
                 Día de la semana
-                <select
-                  value={diaSemana}
-                  onChange={(e) => setDiaSemana(e.target.value)}
-                >
+                <select value={diaSemana} onChange={(e) => setDiaSemana(e.target.value)}>
                   <option value="0">Domingo</option>
                   <option value="1">Lunes</option>
                   <option value="2">Martes</option>
@@ -132,41 +240,15 @@ export default function SessionModal({ defaultDate, onClose, onSave }) {
           )}
 
           <div className={styles.actions}>
-            <button
-              type="button"
-              className={styles.cancel}
-              onClick={onClose}
-            >
+            <button type="button" className={styles.cancel} onClick={() => onCancel && onCancel()}>
               Cancelar
             </button>
             <button type="submit" className={styles.save}>
-              Crear
+              {sesion ? "Guardar cambios" : "Crear"}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
-
-// 🧠 Generador de sesiones recurrentes
-function generarSesionesRecurrentes(basePayload, diaSemana, fechaLimite) {
-  const sesiones = [];
-  let fechaActual = new Date(basePayload.fecha);
-  const limite = new Date(fechaLimite);
-
-  while (fechaActual.getDay() !== diaSemana) {
-    fechaActual.setDate(fechaActual.getDate() + 1);
-  }
-
-  while (fechaActual <= limite) {
-    const nuevaSesion = {
-      ...basePayload,
-      fecha: new Date(fechaActual).toISOString(),
-    };
-    sesiones.push(nuevaSesion);
-    fechaActual.setDate(fechaActual.getDate() + 7);
-  }
-
-  return sesiones;
 }

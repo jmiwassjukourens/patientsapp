@@ -13,7 +13,7 @@ public interface SessionService {
 
     public SessionDTO updateSession(Long id, Session dto) ;
 
-    public SessionDTO markAsPaid(Long id);
+    public SessionDTO markAsPaid(Long id,String fechaDePagoStr);
 
     public void deleteSession(Long id) ;
 }
