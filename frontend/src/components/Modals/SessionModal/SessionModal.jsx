@@ -22,6 +22,8 @@ export default function SessionModal({
   const [fecha, setFecha] = useState(() =>
     backendISOToInputLocal(sesion?.fecha || "")
   );
+
+  
   const [fechaDePago, setFechaDePago] = useState(() =>
     backendISOToInputLocal(sesion?.fechaDePago || "")
   );

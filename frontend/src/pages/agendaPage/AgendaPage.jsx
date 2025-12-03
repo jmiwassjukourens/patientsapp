@@ -20,6 +20,7 @@ export default function AgendaPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDate, setModalDate] = useState(null);
   const [showActions, setShowActions] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     load();
@@ -30,25 +31,28 @@ export default function AgendaPage() {
     setSessions(s);
   };
 
-  // ---- NUEVA API MODAL ----
   const handleCreateSingle = async (payload) => {
-    const newS = await addSessionForPatient(payload.patientId, payload);
+    const pid = payload.patientId;
+    await addSessionForPatient(pid, payload);
 
-    setSessions((prev) => [...prev, newS]);
-    setModalOpen(false);
+    const data = await getSessions();
+    setSessions(data);
+
+    setShowModal(false);   
   };
+
 
   const handleCreatePeriodic = async ({ basePayload, periodic, sesiones }) => {
-    await addPeriodicSessionsForPatient(basePayload.patientId, {
-      basePayload,
-      periodic,
-      sesiones,
-    });
+    const pid = basePayload.patientId;
 
-    const updated = await getSessions();
-    setSessions(updated);
-    setModalOpen(false);
+    await addPeriodicSessionsForPatient(pid, { basePayload, periodic, sesiones });
+
+    const data = await getSessions();
+    setSessions(data);
+
+    setShowModal(false);   
   };
+
 
   const handleDelete = async (id) => {
     await deleteSession(id);
@@ -159,14 +163,14 @@ const handleReschedule = async (session, nuevaFecha) => {
       />
 
 
-      {modalOpen && (
-        <SessionModal
-          defaultDate={modalDate}
-          onClose={() => setModalOpen(false)}
-          onSaveSingle={handleCreateSingle}
-          onSavePeriodic={handleCreatePeriodic}
-        />
-      )}
+    {modalOpen && (
+      <SessionModal
+        date={modalDate}  
+        onCancel={() => setModalOpen(false)}
+        onSaveSingle={handleCreateSingle}
+        onSavePeriodic={handleCreatePeriodic}
+      />
+    )}
     </div>
   );
 }
