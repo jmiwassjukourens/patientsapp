@@ -25,13 +25,13 @@ function FiltersBar({
 
 
 useEffect(() => {
-  // sincronizar estados locales con los defaults cada vez que cambian
+
   setBusqueda(defaultBusqueda || "");
   setEstado(defaultEstado || "");
   setFechaDesde(defaultFechaDesde || "");
   setFechaHasta(defaultFechaHasta || "");
 
-  // activar checkbox de sesión si vienen fechas predeterminadas
+
   setActiveSesion(!!defaultFechaDesde || !!defaultFechaHasta);
 
 }, [defaultBusqueda, defaultEstado, defaultFechaDesde, defaultFechaHasta]);
@@ -43,13 +43,13 @@ useEffect(() => {
 
 
 const handleFilter = (override) => {
-  // Determinar si usar el flag que viene en override (si existe) o el flag del componente
+
   const isActiveBusqueda = override?.activeBusqueda ?? activeBusqueda;
   const isActiveEstado = override?.activeEstado ?? activeEstado;
   const isActiveSesion = override?.activeSesion ?? activeSesion;
   const isActivePago = override?.activePago ?? activePago;
 
-  // Determinar el valor (override tiene preferencia si viene)
+
   const valBusqueda = override?.busqueda ?? busqueda;
   const valEstado = override?.estado ?? estado;
   const valFechaDesde = override?.fechaDesde ?? fechaDesde;
@@ -233,8 +233,8 @@ useEffect(() => {
               disabled={!activeEstado}
             >
               <option value="">Todos los estados</option>
-              <option value="Pendiente">Pendiente</option>
-              <option value="Pagado">Pagado</option>
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="PAGADO">Pagado</option>
             </select>
           </div>
 

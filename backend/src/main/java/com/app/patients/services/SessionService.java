@@ -1,19 +1,27 @@
 package com.app.patients.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import com.app.patients.entities.Session;
+import com.app.patients.entities.dto.PeriodicSessionDTO;
+import com.app.patients.entities.dto.SessionCreateDTO;
 import com.app.patients.entities.dto.SessionDTO;
 
 
 public interface SessionService {
 
-    public List<SessionDTO> getMySessions() ;
+    List<SessionDTO> getMySessions();
 
-    public SessionDTO createSession(Long patientId, Session dto);
+    SessionDTO createSingle(Long patientId, SessionCreateDTO dto);
 
-    public SessionDTO updateSession(Long id, Session dto) ;
+    List<SessionDTO> createPeriodic(Long patientId, PeriodicSessionDTO dto);
 
-    public SessionDTO markAsPaid(Long id,String fechaDePagoStr);
+    SessionDTO update(Long id, SessionCreateDTO dto);
 
-    public void deleteSession(Long id) ;
+    void delete(Long id);
+
+    SessionDTO markAsPaid(Long id, LocalDateTime fechaDePago);
+
+    SessionDTO reschedule(Long id, LocalDateTime nuevaFecha);
+
+    void cancel(Long id, boolean paid);
 }

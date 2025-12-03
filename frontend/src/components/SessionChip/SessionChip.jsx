@@ -1,22 +1,28 @@
 import styles from "./SessionChip.module.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { CancelModal } from "../Modals/CancelModal/CancelModal";
+import ConfirmModal from "../Modals/ConfirmModal/ConfirmModal";
 import { PayModal } from "../Modals/PayModal/PayModal";
 import { RescheduleModal } from "../Modals/RescheduleModal/RescheduleModal";
 
-
-
-export default function SessionChip({ session, onCancel, onMarkPaid, onReschedule,showActions }) {
-  const [openCancel, setOpenCancel] = useState(false);
+export default function SessionChip({
+  session,
+  onCancel,
+  onMarkPaid,
+  onReschedule,
+  showActions,
+}) {
+  const [showConfirmCancel, setShowConfirmCancel] = useState(false);
   const [openPay, setOpenPay] = useState(false);
   const [openReschedule, setOpenReschedule] = useState(false);
   const navigate = useNavigate();
 
-  const handleConfirmCancel = (data) => {
-    onCancel(session.id, data);
-    setOpenCancel(false);
+ 
+  const handleConfirmCancel = () => {
+    onCancel(session.id);
+    setShowConfirmCancel(false);
   };
+
 
   const handleConfirmPay = (data) => {
     const fechaISO = new Date(data.fechaPago).toISOString();
@@ -24,10 +30,27 @@ export default function SessionChip({ session, onCancel, onMarkPaid, onReschedul
     setOpenPay(false);
   };
 
+
   const handleConfirmReschedule = (data) => {
     const nuevaFechaISO = new Date(data.nuevaFecha).toISOString();
-    onReschedule(session.id, nuevaFechaISO);
+    onReschedule(session, nuevaFechaISO);
     setOpenReschedule(false);
+  };
+
+
+  const handlePacienteClick = () => {
+    const nombre = encodeURIComponent(session.patient?.name || "");
+    const fecha = new Date(session.fecha);
+
+    const fechaDesde = fecha.toISOString().slice(0, 10);
+
+    const fechaHastaObj = new Date(fecha);
+    fechaHastaObj.setDate(fecha.getDate() + 1);
+    const fechaHasta = fechaHastaObj.toISOString().slice(0, 10);
+
+    navigate(
+      `/sesiones?paciente=${nombre}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`
+    );
   };
 
   const time = new Date(session.fecha).toLocaleTimeString([], {
@@ -35,25 +58,14 @@ export default function SessionChip({ session, onCancel, onMarkPaid, onReschedul
     minute: "2-digit",
   });
 
-const handlePacienteClick = () => {
-  const nombre = encodeURIComponent(session.patient?.name || "");
-  const fecha = new Date(session.fecha);
-
-
-  const fechaDesde = fecha.toISOString().slice(0, 10);
-
-
-  const fechaHastaObj = new Date(fecha);
-  fechaHastaObj.setDate(fecha.getDate() + 1);
-  const fechaHasta = fechaHastaObj.toISOString().slice(0, 10);
-
-  navigate(`/sesiones?paciente=${nombre}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`);
-};
-
- return (
+  return (
     <>
-      <div className={`${styles.chip} ${styles[session.estado?.toLowerCase() || "pendiente"]}`}>
-        <div className={styles.left }>
+      <div
+        className={`${styles.chip} ${
+          styles[session.estado?.toLowerCase() || "pendiente"]
+        }`}
+      >
+        <div className={styles.left}>
           <div
             className={styles.name}
             onClick={handlePacienteClick}
@@ -62,6 +74,7 @@ const handlePacienteClick = () => {
           >
             {session.patient?.name || "—"}
           </div>
+
           <div className={styles.meta}>
             <span className={styles.time}>{time}</span>
           </div>
@@ -69,16 +82,6 @@ const handlePacienteClick = () => {
 
         {showActions && (
           <div className={styles.actions}>
-            {/*
-            <button
-              className={styles.payBtn}
-              title={session.fechaDePago ? "Ya marcado como pagado" : "Registrar pago"}
-              disabled={!!session.fechaDePago}
-              onClick={() => setOpenPay(true)}
-            >
-              💰
-            </button>
-            */}
             <button
               className={styles.rescheduleBtn}
               title="Reprogramar sesión"
@@ -90,7 +93,7 @@ const handlePacienteClick = () => {
             <button
               className={styles.rescheduleBtn}
               title="Cancelar sesión"
-              onClick={() => setOpenCancel(true)}
+              onClick={() => setShowConfirmCancel(true)}
             >
               🛑
             </button>
@@ -98,12 +101,17 @@ const handlePacienteClick = () => {
         )}
       </div>
 
-      <CancelModal
-        open={openCancel}
-        onClose={() => setOpenCancel(false)}
+    
+      <ConfirmModal
+        show={showConfirmCancel}
+        onClose={() => setShowConfirmCancel(false)}
         onConfirm={handleConfirmCancel}
-        sesion={session}
+        title="Cancelar sesión"
+        message="¿Estás seguro de que querés cancelar esta sesión?"
+        confirmText="Cancelar sesión"
+        confirmColor="danger"
       />
+
 
       <PayModal
         open={openPay}
@@ -111,6 +119,7 @@ const handlePacienteClick = () => {
         onConfirm={handleConfirmPay}
         sesion={session}
       />
+
 
       <RescheduleModal
         open={openReschedule}

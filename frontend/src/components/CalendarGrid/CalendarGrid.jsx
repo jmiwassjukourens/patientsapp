@@ -45,18 +45,18 @@ function buildDates(startDate, endDate) {
   return arr;
 }
 
-export default function CalendarGrid({ displayedMonth, sessions, onCreateForDate, onDelete, onMarkPaid, showActions }) {
-  // month boundaries
+export default function CalendarGrid({ displayedMonth, sessions, onCreateForDate, onDelete, onMarkPaid,onReschedule, showActions }) {
+
   const monthStart = useMemo(() => new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), 1), [displayedMonth]);
   const monthEnd = useMemo(() => new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 0), [displayedMonth]);
 
-  // calendar window (complete weeks to show full rows)
+
   const calendarStart = useMemo(() => startOfWeekMonday(monthStart), [monthStart]);
   const calendarEnd = useMemo(() => endOfWeekSunday(monthEnd), [monthEnd]);
 
   const dates = useMemo(() => buildDates(calendarStart, calendarEnd), [calendarStart, calendarEnd]);
 
-  // group sessions by date string for quick lookup (sessions are already filtered to the month in AgendaPage)
+
   const grouped = useMemo(() => {
     const map = {};
     (sessions || []).forEach((s) => {
@@ -68,7 +68,7 @@ export default function CalendarGrid({ displayedMonth, sessions, onCreateForDate
     return map;
   }, [sessions]);
 
-  // chunk dates into weeks (arrays of 7)
+
   const weeks = useMemo(() => {
     const w = [];
     for (let i = 0; i < dates.length; i += 7) {
@@ -125,8 +125,10 @@ export default function CalendarGrid({ displayedMonth, sessions, onCreateForDate
                           session={s}
                           onCancel={onDelete}
                           onMarkPaid={(fechaPago) => onMarkPaid(s.id, fechaPago)}
+                          onReschedule={(session, nuevaFecha) => onReschedule(session, nuevaFecha)}
                           showActions={showActions}
                         />
+
                       ))
                     )}
                   </div>

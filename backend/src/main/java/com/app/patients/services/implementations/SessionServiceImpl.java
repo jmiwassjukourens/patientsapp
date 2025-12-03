@@ -1,13 +1,14 @@
 package com.app.patients.services.implementations;
 
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,8 @@ import com.app.patients.entities.Patient;
 import com.app.patients.entities.Session;
 import com.app.patients.entities.SessionStatus;
 import com.app.patients.entities.User;
-import com.app.patients.entities.dto.PeriodicRequest;
+import com.app.patients.entities.dto.PeriodicSessionDTO;
+import com.app.patients.entities.dto.SessionCreateDTO;
 import com.app.patients.entities.dto.SessionDTO;
 import com.app.patients.entities.dto.SessionMapper;
 import com.app.patients.exceptions.ApiException;
@@ -54,7 +56,7 @@ public class SessionServiceImpl implements SessionService {
                 .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED_ACTION));
     }
 
-    // GET todas las sesiones del usuario logueado (DEVUELVE DTO)
+      @Override
     public List<SessionDTO> getMySessions() {
         User auth = userService.getAuthenticatedUser();
 
@@ -64,118 +66,101 @@ public class SessionServiceImpl implements SessionService {
                 .collect(Collectors.toList());
     }
 
-    public SessionDTO createSession(Long patientId, Session dto) {
+    @Override
+    public SessionDTO createSingle(Long patientId, SessionCreateDTO dto) {
         Patient p = getOwnedPatientOrThrow(patientId);
 
         Session s = new Session();
         s.setFecha(dto.getFecha());
-        s.setFechaDePago(dto.getFechaDePago());
-        s.setEstado(dto.getEstado());
         s.setPrecio(dto.getPrecio());
+        s.setEstado(SessionStatus.valueOf(dto.getEstado()));
+        s.setFechaDePago(dto.getFechaDePago());
         s.setPatient(p);
 
         return SessionMapper.toDTO(sessionRepository.save(s));
     }
 
-    public SessionDTO updateSession(Long id, Session dto) {
+    @Override
+    public List<SessionDTO> createPeriodic(Long patientId, PeriodicSessionDTO dto) {
+
+        Patient p = getOwnedPatientOrThrow(patientId);
+
+        List<Session> sesiones = new ArrayList<>();
+
+        SessionCreateDTO base = dto.getBasePayload();
+        LocalDateTime baseDate = base.getFecha();
+        LocalDate limite = dto.getPeriodic().getEndDate();
+        DayOfWeek dia = dto.getPeriodic().getDayOfWeek();
+
+        LocalDateTime cursor = baseDate;
+
+        while (cursor.getDayOfWeek() != dia) cursor = cursor.plusDays(1);
+
+        while (!cursor.toLocalDate().isAfter(limite)) {
+            Session s = new Session();
+            s.setPatient(p);
+            s.setFecha(cursor);
+            s.setPrecio(base.getPrecio());
+            s.setEstado(SessionStatus.valueOf(base.getEstado()));
+            sesiones.add(s);
+
+            cursor = cursor.plusWeeks(1);
+        }
+
+        return StreamSupport.stream(sessionRepository.saveAll(sesiones).spliterator(), false)
+                .map(SessionMapper::toDTO)
+                .collect(Collectors.toList());
+
+    }
+
+    @Override
+    public SessionDTO update(Long id, SessionCreateDTO dto) {
         Session s = getOwnedSessionOrThrow(id);
 
         s.setFecha(dto.getFecha());
         s.setFechaDePago(dto.getFechaDePago());
-        s.setEstado(dto.getEstado());
         s.setPrecio(dto.getPrecio());
+        s.setEstado(SessionStatus.valueOf(dto.getEstado()));
 
         return SessionMapper.toDTO(sessionRepository.save(s));
     }
 
-    public SessionDTO markAsPaid(Long id, String fechaDePagoStr) {
-        Session s = getOwnedSessionOrThrow(id);
-        s.setEstado(SessionStatus.PAGADO);
-
-        if (fechaDePagoStr != null && !fechaDePagoStr.isBlank()) {
-            LocalDateTime fecha;
-            try {
-               
-                fecha = LocalDateTime.parse(fechaDePagoStr);
-            } catch (DateTimeParseException ex1) {
-                
-                try {
-                    fecha = OffsetDateTime.parse(fechaDePagoStr).toLocalDateTime();
-                } catch (DateTimeParseException ex2) {
-                   
-                    fecha = LocalDateTime.now();
-                }
-            }
-            s.setFechaDePago(fecha);
-        } else {
-            s.setFechaDePago(LocalDateTime.now());
-        }
-
-        return SessionMapper.toDTO(sessionRepository.save(s));
-    }
-
-
-
-    public void deleteSession(Long id) {
+    @Override
+    public void delete(Long id) {
         Session s = getOwnedSessionOrThrow(id);
         sessionRepository.delete(s);
     }
 
-    public List<SessionDTO> createPeriodicSessions(Long patientId, PeriodicRequest dto) {
-    Patient p = getOwnedPatientOrThrow(patientId);
-    List<SessionDTO> created = new ArrayList<>();
+    @Override
+    public SessionDTO markAsPaid(Long id, LocalDateTime fechaDePago) {
+        Session s = getOwnedSessionOrThrow(id);
 
-    if (dto.periodic == null) {
-        Session s = new Session();
-        s.setFecha(parseLocalDateTimeSafe(dto.getFecha().toString()));
-        s.setFechaDePago(dto.getFechaDePago().toString() != null ? parseLocalDateTimeSafe(dto.getFechaDePago().toString()) : null);
-        s.setEstado(SessionStatus.valueOf(dto.getEstado().toString()));
-        s.setPrecio(dto.getPrecio());
-        s.setPatient(p);
-        created.add(SessionMapper.toDTO(sessionRepository.save(s)));
-        return created;
+        s.setEstado(SessionStatus.PAGADO);
+        s.setFechaDePago(
+                fechaDePago != null ? fechaDePago : LocalDateTime.now()
+        );
+
+        return SessionMapper.toDTO(sessionRepository.save(s));
     }
 
-    // lógica periódica (ejemplo simple: WEEKLY)
-    PeriodicRequest pr = dto.periodic;
-    LocalDateTime start = parseLocalDateTimeSafe(dto.getFecha().toString());
-    LocalDate end = LocalDate.parse(pr.endDate); // yyyy-MM-dd
-    int every = pr.every != null ? pr.every : 1;
-
-    LocalDateTime current = start;
-    while (!current.toLocalDate().isAfter(end)) {
-        Session s = new Session();
-        s.setFecha(current);
-        s.setFechaDePago(null);
-        s.setEstado(SessionStatus.valueOf(dto.estado));
-        s.setPrecio(dto.precio);
-        s.setPatient(p);
-        created.add(SessionMapper.toDTO(sessionRepository.save(s)));
-
-        // sumar semanas
-        current = current.plusWeeks(every);
+    @Override
+    public SessionDTO reschedule(Long id, LocalDateTime nuevaFecha) {
+        Session s = getOwnedSessionOrThrow(id);
+        s.setFecha(nuevaFecha);
+        return SessionMapper.toDTO(sessionRepository.save(s));
     }
 
-    return created;
-}
+    @Override
+    public void cancel(Long id, boolean paid) {
+        Session s = getOwnedSessionOrThrow(id);
 
-private LocalDateTime parseLocalDateTimeSafe(String s) {
-    if (s == null) return null;
-    try {
-        return LocalDateTime.parse(s);
-    } catch (DateTimeParseException ex) {
-        // intentar quitar milisegundos extra o parsear como Offset
-        String normalized = s.endsWith("Z") ? s.substring(0, s.length()-1) : s;
-        // truncar microsegundos: keep up to 3 decimals
-        Matcher m = Pattern.compile("^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(?:\\.(\\d{1,6}))?$").matcher(normalized);
-        if (m.find()) {
-            String base = m.group(1);
-            String frac = m.group(2) != null ? m.group(2).substring(0, Math.min(3, m.group(2).length())) : "000";
-            return LocalDateTime.parse(base + "." + frac);
+        if (paid) {
+            s.setEstado(SessionStatus.PAGADO);
+            s.setFechaDePago(LocalDateTime.now());
+            sessionRepository.save(s);
+        } else {
+            sessionRepository.delete(s);
         }
-        // fallback
-        return LocalDateTime.now();
     }
-}
-
+    
 }

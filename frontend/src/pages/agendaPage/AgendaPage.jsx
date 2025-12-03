@@ -1,19 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import { getSessions, addSessionForPatient,addPeriodicSessionsForPatient, deleteSession, updateSession } from "../../services/sessionService";
+import {
+  getSessions,
+  addSessionForPatient,
+  addPeriodicSessionsForPatient,
+  deleteSession,
+  updateSession,
+} from "../../services/sessionService";
 import CalendarGrid from "../../components/CalendarGrid/CalendarGrid";
 import AgendaFilterBar from "../../components/CalendarGrid/AgendaFiltersBar";
 import SessionModal from "../../components/Modals/SessionModal/SessionModal";
 import styles from "./AgendaPage.module.css";
 
-function toIso(d) {
-  return d.toISOString().slice(0, 10);
-}
-
 export default function AgendaPage() {
   const today = new Date();
   const [sessions, setSessions] = useState([]);
-  // displayedMonth is a Date representing any day in the shown month
-  const [displayedMonth, setDisplayedMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [displayedMonth, setDisplayedMonth] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDate, setModalDate] = useState(null);
   const [showActions, setShowActions] = useState(true);
@@ -27,48 +30,78 @@ export default function AgendaPage() {
     setSessions(s);
   };
 
-  const handleAdd = async (payload) => {
-    if (Array.isArray(payload)) {
-      const nuevas = [];
-      for (const sesion of payload) {
-        const newS = await addSessionForPatient(sesion);
-        nuevas.push(newS);
-      }
-      setSessions((prev) => [...prev, ...nuevas]);
-    } else {
-      const newS = await addSessionForPatient(payload);
-      setSessions((prev) => [...prev, newS]);
-    }
+  // ---- NUEVA API MODAL ----
+  const handleCreateSingle = async (payload) => {
+    const newS = await addSessionForPatient(payload.patientId, payload);
+
+    setSessions((prev) => [...prev, newS]);
+    setModalOpen(false);
+  };
+
+  const handleCreatePeriodic = async ({ basePayload, periodic, sesiones }) => {
+    await addPeriodicSessionsForPatient(basePayload.patientId, {
+      basePayload,
+      periodic,
+      sesiones,
+    });
+
+    const updated = await getSessions();
+    setSessions(updated);
     setModalOpen(false);
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Eliminar sesión?")) return;
     await deleteSession(id);
     setSessions((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleMarkPaid = async (id, fechaPago) => {
     await updateSession(id, { fechaDePago: fechaPago, estado: "Pagado" });
+
     setSessions((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, fechaDePago, estado: "Pagado" } : s))
+      prev.map((s) =>
+        s.id === id ? { ...s, fechaDePago, estado: "Pagado" } : s
+      )
     );
   };
 
-  // month start and end (for filtering sessions to the shown month)
+const handleReschedule = async (session, nuevaFecha) => {
+  const updated = {
+    ...session,
+    fecha: nuevaFecha
+  };
+
+  const saved = await updateSession(session.id, updated);
+
+  setSessions((prev) =>
+    prev.map((s) =>
+      s.id === session.id ? saved : s
+    )
+  );
+};
+
+
+
   const monthStart = useMemo(() => {
-    const m = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), 1);
-    m.setHours(0,0,0,0);
+    const m = new Date(
+      displayedMonth.getFullYear(),
+      displayedMonth.getMonth(),
+      1
+    );
+    m.setHours(0, 0, 0, 0);
     return m;
   }, [displayedMonth]);
 
   const monthEnd = useMemo(() => {
-    const m = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 0);
-    m.setHours(23,59,59,999);
+    const m = new Date(
+      displayedMonth.getFullYear(),
+      displayedMonth.getMonth() + 1,
+      0
+    );
+    m.setHours(23, 59, 59, 999);
     return m;
   }, [displayedMonth]);
 
-  // filter sessions to only those in the visible month 
   const filteredSessions = useMemo(() => {
     return sessions.filter((s) => {
       const fecha = new Date(s.fecha);
@@ -76,25 +109,12 @@ export default function AgendaPage() {
     });
   }, [sessions, monthStart, monthEnd]);
 
-  const goMonth = (offset) => {
-    setDisplayedMonth((prev) => {
-      const y = prev.getFullYear();
-      const m = prev.getMonth() + offset;
-      return new Date(y, m, 1);
-    });
-  };
-
-  const setToCurrentMonth = () => {
-    const now = new Date();
-    setDisplayedMonth(new Date(now.getFullYear(), now.getMonth(), 1));
-  };
-
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
         <div className={styles.titleBlock}>
           <h2 className={styles.title}>Agenda</h2>
-                    <p className={styles.subtitle}>
+          <p className={styles.subtitle}>
             De la búsqueda a la gestión, en segundos
           </p>
           <div className={styles.headerControls}>
@@ -108,9 +128,12 @@ export default function AgendaPage() {
         </div>
 
         <div className={styles.controls}>
-           <div className={styles.currentMonthLabel}>
-              {displayedMonth.toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
-            </div>
+          <div className={styles.currentMonthLabel}>
+            {displayedMonth.toLocaleDateString("es-ES", {
+              month: "long",
+              year: "numeric",
+            })}
+          </div>
         </div>
       </div>
 
@@ -122,7 +145,6 @@ export default function AgendaPage() {
         }}
       />
 
-
       <CalendarGrid
         displayedMonth={displayedMonth}
         sessions={filteredSessions}
@@ -132,14 +154,17 @@ export default function AgendaPage() {
         }}
         onDelete={handleDelete}
         onMarkPaid={handleMarkPaid}
+        onReschedule={handleReschedule}   
         showActions={showActions}
       />
+
 
       {modalOpen && (
         <SessionModal
           defaultDate={modalDate}
           onClose={() => setModalOpen(false)}
-          onSave={handleAdd}
+          onSaveSingle={handleCreateSingle}
+          onSavePeriodic={handleCreatePeriodic}
         />
       )}
     </div>
