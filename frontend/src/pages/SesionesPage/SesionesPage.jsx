@@ -6,7 +6,7 @@ import NewSessionButton from "../../components/NewSessionButton/NewSessionButton
 import FiltersBar from "../../components/FiltersBar/FiltersBar";
 import EditSesionModal from "../../components/Modals/EditSesionModal/EditSesionModal"; 
 import SessionModal from "../../components/Modals/SessionModal/SessionModal"; 
-import { getSessions, updateSession, deleteSession, markAsPaid } from "../../services/sessionService";
+import { getSessions, updateSession, deleteSession, markAsPaid ,addSessionForPatient,addPeriodicSessionsForPatient} from "../../services/sessionService";
 import { useToast } from "../../hooks/useToast.jsx";
  
 function SesionesPage() {
@@ -86,7 +86,7 @@ const handleMarkAsPaid = async (id, fechaDePago = null) => {
   try {
     const actualizada = await markAsPaid(id, fechaDePago);
     setSesiones((prev) => prev.map((s) => (s.id === id ? actualizada : s)));
-    toast.info("Sesión actualizada correctamente:");
+    toast.info("Sesión actualizada correctamente");
   } catch (err) {
     toast.error("Error marcando como pagado");
 
@@ -104,22 +104,28 @@ const handleMarkAsPaid = async (id, fechaDePago = null) => {
   };
 
 
-    const handleCreateSingle = async (payload) => {
+  const handleCreateSingle = async (payload) => {
     const pid = payload.patientId;
     await addSessionForPatient(pid, payload);
 
     const data = await getSessions();
     setSesiones(data);
+
+    setShowModal(false);   
   };
 
+
   const handleCreatePeriodic = async ({ basePayload, periodic, sesiones }) => {
-    const pid = basePayload.patientId ;
+    const pid = basePayload.patientId;
 
     await addPeriodicSessionsForPatient(pid, { basePayload, periodic, sesiones });
 
     const data = await getSessions();
     setSesiones(data);
+
+    setShowModal(false);   
   };
+
 
   const sesionesFiltradas = sesiones.filter((s) => {
     const fechaSesion = new Date(s.fecha);
@@ -196,7 +202,7 @@ const handleMarkAsPaid = async (id, fechaDePago = null) => {
 
       {showModal && (
         <SessionModal
-          onClose={() => setShowModal(false)}
+          onCancel={() => setShowModal(false)}
           onSaveSingle={handleCreateSingle}
           onSavePeriodic={handleCreatePeriodic}
         />

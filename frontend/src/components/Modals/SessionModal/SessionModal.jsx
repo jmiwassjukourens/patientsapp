@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import styles from "./SessionModal.module.css";
 import {
@@ -6,7 +5,8 @@ import {
   inputLocalToBackendLocalDateTime,
   inputLocalToDate,
 } from "../../../utils/dateUtils.js";
-
+import { fetchPatients } from "../../../services/PatientService.js"; 
+import { useToast } from "../../../hooks/useToast.jsx";
 
 export default function SessionModal({
   sesion = null,
@@ -15,7 +15,13 @@ export default function SessionModal({
   onCancel,
 }) {
 
-  const [fecha, setFecha] = useState(() => backendISOToInputLocal(sesion?.fecha || ""));
+  const [patients, setPatients] = useState([]);
+
+  const toast = useToast();
+
+  const [fecha, setFecha] = useState(() =>
+    backendISOToInputLocal(sesion?.fecha || "")
+  );
   const [fechaDePago, setFechaDePago] = useState(() =>
     backendISOToInputLocal(sesion?.fechaDePago || "")
   );
@@ -23,17 +29,20 @@ export default function SessionModal({
   const [estado, setEstado] = useState(sesion?.estado ?? "PENDIENTE");
 
 
-  const [nombre, setNombre] = useState(sesion?.patient?.name ?? sesion?.paciente?.nombre ?? "");
-  const [patientId, setPatientId] = useState(sesion?.patient?.id ?? sesion?.patientId ?? null);
+  const [patientId, setPatientId] = useState(
+    sesion?.patient?.id ?? sesion?.patientId ?? null
+  );
 
+  const [nombre, setNombre] = useState(
+    sesion?.patient?.name ?? sesion?.paciente?.nombre ?? ""
+  );
 
   const [adjunto, setAdjunto] = useState(sesion?.adjunto ?? null);
-
 
   const [recurrente, setRecurrente] = useState(!!sesion?.periodic);
   const [diaSemana, setDiaSemana] = useState(
     sesion?.periodic?.dayOfWeek ? dayOfWeekToNumber(sesion.periodic.dayOfWeek) : "1"
-  ); 
+  );
   const [fechaLimite, setFechaLimite] = useState(sesion?.periodic?.endDate ?? "");
 
 
@@ -46,9 +55,25 @@ export default function SessionModal({
     setPatientId(sesion?.patient?.id ?? sesion?.patientId ?? null);
     setAdjunto(sesion?.adjunto ?? null);
     setRecurrente(!!sesion?.periodic);
-    setDiaSemana(sesion?.periodic?.dayOfWeek ? dayOfWeekToNumber(sesion.periodic.dayOfWeek) : "1");
+    setDiaSemana(
+      sesion?.periodic?.dayOfWeek ? dayOfWeekToNumber(sesion.periodic.dayOfWeek) : "1"
+    );
     setFechaLimite(sesion?.periodic?.endDate ?? "");
   }, [sesion]);
+
+
+  useEffect(() => {
+    async function loadPatients() {
+      try {
+        const data = await fetchPatients();
+        setPatients(Array.isArray(data) ? data : []);
+      } catch (err) {
+        toast.error("Error al cargar pacientes: " + err.message);
+        setPatients([]);
+      }
+    }
+    loadPatients();
+  }, []);
 
   function dayOfWeekToNumber(day) {
     if (!day) return "1";
@@ -69,27 +94,26 @@ export default function SessionModal({
     return map[Number(num) % 7];
   }
 
-
   function generarSesionesRecurrentes(basePayload, diaSemanaNum, fechaLimiteStr) {
     const sesiones = [];
 
+
     const baseDate = new Date(basePayload.fecha.replace(" ", "T"));
-    const limite = new Date(fechaLimiteStr); 
+    const limite = new Date(fechaLimiteStr);
 
     let fechaActual = new Date(baseDate);
+
     while (fechaActual.getDay() !== Number(diaSemanaNum)) {
       fechaActual.setDate(fechaActual.getDate() + 1);
     }
 
     while (fechaActual <= limite) {
-
       const yyyy = fechaActual.getFullYear();
       const mm = String(fechaActual.getMonth() + 1).padStart(2, "0");
       const dd = String(fechaActual.getDate()).padStart(2, "0");
       const hh = String(baseDate.getHours()).padStart(2, "0");
       const min = String(baseDate.getMinutes()).padStart(2, "0");
 
-  
       const fechaStr = `${yyyy}-${mm}-${dd}T${hh}:${min}:00`;
 
       sesiones.push({
@@ -97,76 +121,80 @@ export default function SessionModal({
         fecha: fechaStr,
       });
 
-   
       fechaActual.setDate(fechaActual.getDate() + 7);
     }
 
     return sesiones;
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
+  if (!fecha || !patientId) {
+    alert("Completá la fecha y seleccioná un paciente.");
+    return;
+  }
 
-    if (!fecha || (!patientId && !nombre)) {
-      alert("Completá la fecha y el paciente (ID o nombre).");
-      return;
-    }
+  const payloadBase = {
+    fecha: inputLocalToBackendLocalDateTime(fecha), 
+    fechaDePago: fechaDePago ? inputLocalToBackendLocalDateTime(fechaDePago) : null,
+    estado: estado ?? "PENDIENTE",
+    precio: Number(precio) || 0,
+    patientId: Number(patientId),
+  };
 
+  try {
+    if (!recurrente) {
+      if (!onSaveSingle) throw new Error("onSaveSingle no definido");
+      await onSaveSingle(payloadBase);
+      toast.info("Sesión guardada correctamente");
+    } else {
+      if (!fechaLimite) {
+        toast.error("Seleccioná una fecha límite para la recurrencia");
+        return;
+      }
+      if (!onSavePeriodic) throw new Error("onSavePeriodic no definido");
 
-    const payloadBase = {
-      fecha: inputLocalToBackendLocalDateTime(fecha), 
-      fechaDePago: fechaDePago ? inputLocalToBackendLocalDateTime(fechaDePago) : null,
-      estado: estado ?? "PENDIENTE",
-      precio: Number(precio) || 0,
-   
-      patientId: patientId ?? undefined,
-      patient: patientId ? undefined : { name: nombre },
-      adjunto: adjunto || null,
-    };
+      const basePayloadForGen = {
+        ...payloadBase,
+        fecha: inputLocalToBackendLocalDateTime(fecha).replace(" ", "T"),
+      };
 
-    try {
-      if (!recurrente) {
-    
-        if (!onSave) throw new Error("onSave no definido");
-        await onSaveSingle(payloadBase);
-      } else {
-     
-        if (!fechaLimite) {
-          alert("Seleccioná una fecha límite para la recurrencia");
-          return;
-        }
-        if (!onSavePeriodic) throw new Error("onSavePeriodic no definido");
-        const sesiones = generarSesionesRecurrentes(payloadBase, diaSemana, fechaLimite);
-        await onSavePeriodic({ periodic: {
+      const sesiones = generarSesionesRecurrentes(basePayloadForGen, diaSemana, fechaLimite);
+
+      await onSavePeriodic({
+        periodic: {
           frequency: "WEEKLY",
           every: 1,
           dayOfWeek: numberToDayOfWeek(diaSemana),
-          endDate: fechaLimite
-        }, basePayload, sesiones });
-      
-      }
-
-   
-      if (onCancel) onCancel();
-    } catch (err) {
-      console.error("Error al guardar sesión:", err);
-      alert("Hubo un error al guardar la sesión.");
+          endDate: fechaLimite,
+        },
+        basePayload: payloadBase,
+        sesiones,
+      });
+      toast.info("Sesiones recurrentes guardadas correctamente ");
     }
-  };
+
+    if (onCancel) onCancel();
+  } catch (err) {
+    toast.error("Error al guardar la sesión: " + err.message);
+  }
+};
+
 
   return (
-    <div className={styles.backdrop}>
-      <div className={styles.modal} role="dialog" aria-modal="true">
+    <div className={styles.backdrop} onClick={onCancel}>
+      <div className={styles.modal} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3>{sesion ? "✏️ Editar sesión" : "🗓️ Nueva sesión"}</h3>
-          <button
-            className={styles.closeBtn}
-            onClick={() => (onCancel ? onCancel() : null)}
-            aria-label="Cerrar"
-          >
-            ✖
-          </button>
+            <button
+              className={styles.closeBtn}
+              onClick={onCancel}
+              aria-label="Cerrar"
+            >
+              ✖
+            </button>
+
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -193,13 +221,24 @@ export default function SessionModal({
           </div>
 
           <label>
-            Nombre del paciente
-            <input
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ej. Ana López"
-            />
+            Paciente
+            <select
+              value={patientId ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                setPatientId(val ? Number(val) : null);
+                const selected = patients.find((p) => p.id === Number(val));
+                setNombre(selected?.name ?? "");
+              }}
+              required
+            >
+              <option value="">Seleccioná un paciente...</option>
+              {patients.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
           </label>
 
           <div className={styles.divider} />
@@ -240,9 +279,10 @@ export default function SessionModal({
           )}
 
           <div className={styles.actions}>
-            <button type="button" className={styles.cancel} onClick={() => onCancel && onCancel()}>
+            <button type="button" className={styles.cancel} onClick={onCancel}>
               Cancelar
             </button>
+
             <button type="submit" className={styles.save}>
               {sesion ? "Guardar cambios" : "Crear"}
             </button>
