@@ -37,7 +37,4 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
         )
     """, nativeQuery = true)
     Long countSessionsForToday(@Param("userId") Long userId);
-
-
-
 }

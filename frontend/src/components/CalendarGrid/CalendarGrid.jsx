@@ -109,7 +109,8 @@ export default function CalendarGrid({ displayedMonth, sessions, onCreateForDate
                     <button
                       className={styles.cellAdd}
                       title={`Crear sesión ${key}`}
-                      onClick={() => onCreateForDate(key)}
+                      onClick={() => onCreateForDate(key)
+                      }
                     >
                       +
                     </button>

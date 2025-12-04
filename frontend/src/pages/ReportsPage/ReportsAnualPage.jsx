@@ -12,7 +12,7 @@ import {
 import { Bar, Pie } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
 import { FiDollarSign, FiCheckCircle, FiAlertTriangle, FiExternalLink } from "react-icons/fi";
-import { reportsService } from "../../services/reportsService";
+import { fetchAnnualReport } from "../../services/reportsService";
 import ReportsYearFilter from "../../components/Reports/ReportsYearFilter";
 import styles from "./ReportsAnualPage.module.css";
 
@@ -23,10 +23,19 @@ export default function ReportsAnualPage() {
   const [reportData, setReportData] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const data = reportsService.getAnualReport(year);
-    setReportData(data);
-  }, [year]);
+useEffect(() => {
+  async function load() {
+    try {
+      const data = await fetchAnnualReport(year);
+      setReportData(data);
+    } catch (error) {
+      console.error("Error fetching annual report", error);
+    }
+  }
+
+  load();
+}, [year]);
+
 
   if (!reportData) return <p>Cargando...</p>;
 
@@ -64,9 +73,9 @@ const barOptions = {
     stacked: true,
     ticks: {
       color: "#444",
-      maxRotation: 45, // máxima rotación de la etiqueta
-      minRotation: 45, // mínima rotación
-      autoSkip: false, // no saltar etiquetas
+      maxRotation: 45, 
+      minRotation: 45, 
+      autoSkip: false, 
     },
     grid: { display: false },
     categoryPercentage: 0.7,
@@ -102,7 +111,7 @@ const handleViewMonth = (monthIndex) => {
   const lastDay = new Date(year, month, 0).getDate();
   const fechaHasta = `${yearStr}-${monthStr}-${String(lastDay).padStart(2, "0")}`;
 
-  const estado = encodeURIComponent("Pendiente");
+  const estado = encodeURIComponent("PENDIENTE");
 
   navigate(
     `/sesiones?estado=${estado}&fechaDesde=${encodeURIComponent(
