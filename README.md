@@ -3,160 +3,201 @@
 ---
 
 **PatientApp** is a complete management system designed for psychologists, therapists, and independent health professionals.  
-It centralizes patient data, sessions, debts, notifications, and financial statistics, providing a smart and modern workflow.
+It centralizes patients, sessions, debts, notifications, and financial analytics into a modern and efficient workflow.
 
-Built as a **full-stack project using React and Spring Boot**, the platform implements real authentication, notifications, dashboards, and full CRUD management.
+Built as a **full-stack project using React and Spring Boot**, it implements authentication, dashboards, automation, notifications, and full CRUD operations.
 
 ---
 
 ## 🌍 Problem Statement
 
-Independent professionals often rely on manual tools (Excel, WhatsApp, paper notebooks) to manage:
+Independent professionals often rely on fragmented tools (spreadsheets, messaging apps, paper notes) to manage:
 
-- Session scheduling  
-- Pending payments  
-- Patient data  
-- Notifications and reminders  
-- Daily workflow  
+- Sessions  
+- Payments  
+- Patient histories  
+- Notifications  
+- Scheduling  
 
-These disconnected tools lead to **errors, forgotten payments, double bookings, or loss of information**.
+This usually causes **errors, forgotten payments, double bookings, and lost information**.
 
-**PatientApp** solves this by offering a **unified, automated, and modern clinical management platform**.
+**PatientApp** solves this by offering a unified and automated clinical management platform.
 
 ---
 
 ## 🎯 Main Objectives
 
-- Centralize patient management  
+- Centralize patient and session management  
 - Automate reminders and notifications  
-- Track sessions (past & upcoming)  
-- Monitor pending payments and income  
-- Provide a financial dashboard for informed decisions  
-- Improve workflow through real-time updates and alerts  
+- Track past & upcoming sessions  
+- Monitor debts and financial metrics  
+- Provide a clean dashboard for fast decision-making  
+- Enable real-time UI synchronization  
 
 ---
 
-## 🧱 System Architecture
+# 🧱 System Architecture
 
-### Frontend Layer (React)
+## Frontend (React)
 
 - React + Hooks  
-- Context API for global state management  
-- Custom hooks (notifications, sessions, authentication)  
+- Context API for global state  
+- Custom hooks (sessions, notifications, authentication)  
 - Protected routes using JWT  
-- Fetch wrapper with interceptor (`apiFetch`)  
-- Responsive UI (mobile-first design)  
+- `apiFetch` wrapper with interceptor  
+- Fully responsive design  
 
-### Backend Layer (Spring Boot)
+## Backend (Spring Boot)
 
-- Spring Security (JWT authentication & validation)  
-- RESTful API — MVC architecture  
+- Spring Security + JWT  
+- REST API (Controller → Service → Repository)  
 - JPA + Hibernate  
-- DTO mapping  
-- Notification system  
-- Ready for schedulers / background jobs  
+- DTOs & Mappers  
+- Automatic Notifications System  
 - MySQL relational database  
 
 ---
 
-## 🖥️ Features Overview
-
-### ✅ Patient Management
-
-Create, edit, archive, delete, and search patients efficiently.
-
-> _(Screenshot — Patients Dashboard)_
+# 🖥️ Features Overview
 
 ---
 
-### ✅ Session Calendar & Scheduling
+## ✅ Patient Management
 
-View upcoming sessions, past appointments, and track unpaid sessions.
+Create, edit, archive, delete, and search patients easily.
 
-> _(Screenshot — Sessions Calendar)_
-
----
-
-### ✅ Financial Dashboard
-
-Monitor:
-
-- Total income  
-- Pending debts  
-- Monthly analytics  
-- Performance indicators  
-
-> _(Screenshot — Financial Dashboard)_
+### 📸 Patients Dashboard  
+![Patients Dashboard](assets/patientDashboard.png)
 
 ---
 
-### ✅ Smart Notifications (Automatically Generated)
+## ✅ Session Calendar & Scheduling
 
-The backend generates notifications for:
+View upcoming sessions, past appointments, and handle payment status.
 
-- Sessions scheduled for today  
+### 📸 Session Calendar  
+![Calendar](assets/calendar.png)
+
+### 📸 Button Actions  
+
+**Create Session:**  
+![Create Session](assets/calendar2.png)
+
+**Reschedule Session:**  
+![Reschedule Session](assets/calendar3.png)
+
+**Cancel Session:**  
+![Cancel Session](assets/calendar4.png)
+
+---
+
+# 🗂️ Sessions Module
+
+A complete module to manage all sessions in one place.
+
+## 🔎 Filters  
+![Session Filters](assets/filtersSession.png)
+
+---
+
+## 📋 Sessions List  
+![Sessions List](assets/session1.png)
+
+---
+
+## ⚙️ Session Actions  
+![Session Actions](assets/session2.png)
+
+---
+
+## 💰 Financial Dashboard
+
+Monitor income, pending payments, monthly analytics, and performance insights.
+
+### 📸 Financial Dashboard  
+![Financial Dashboard 1](assets/dashboard1.png)  
+![Financial Dashboard 2](assets/dashboard2.png)
+
+---
+
+## 🔔 Smart Notifications (Auto-Generated)
+
+The backend automatically generates notifications for:
+
+- Today’s sessions  
 - Pending payments  
-- Newly added patients  
-- System reminders  
+- New patients  
+- Reminder events  
 
-Users can mark notifications as **read** or **delete them** (individually or all at once).
+Users can **mark as read**, **delete individually**, or **clear all**.
 
-> _(Screenshot — Notifications Panel)_
-
----
-
-### ✅ Patient Debt & Reminders
-
-Send individual or bulk reminders for unpaid sessions with a single click.
-
-> _(Screenshot — Debt Tools)_
+### 📸 Notifications Panel  
+![Notifications Panel](assets/notificationPanel.png)
 
 ---
 
-## 📱 Responsive Design
+## 💳 Patient Debt & Reminders
 
-The application is fully responsive and optimized for:
+Included inside the **Patient Dashboard** — send:
 
-- Desktop
-- Tablet
-- Mobile
+- Single reminders  
+- Bulk reminders  
 
-> _(Screenshots — Mobile UI)_
+With one click.
+
+![Debt Tools](assets/patientDashboard.png)
 
 ---
 
-## ⭐ Tech Stack
+# 📱 Responsive Design
 
-### Frontend
+The entire application is optimized for use on:
 
+- Desktop  
+- Tablet  
+- Mobile  
+
+### 📸 Mobile UI  
+![Responsive 1](assets/responsive1.png)  
+![Responsive 2](assets/responsive2.png)  
+![Responsive 3](assets/responsive3.png)  
+![Responsive 4](assets/responsive4.png)  
+![Responsive 5](assets/responsive5.png)
+
+---
+
+# ⭐ Tech Stack
+
+## Frontend
 - React  
 - Context API  
 - Custom Hooks  
 - JavaScript / TypeScript  
-- Fetch API wrapper (`apiFetch`)  
 - React Router  
-- CSS Modules / Styled Components  
+- CSS Modules  
+- `apiFetch` wrapper  
 
-### Backend
-
+## Backend
 - Spring Boot  
 - Spring Security (JWT)  
-- Java  
 - JPA + Hibernate  
 - MySQL  
 - DTOs & Mappers  
-- Custom Filters (`JwtAuthenticationFilter`, `JwtValidationFilter`)  
-- Notification Service & Repository  
+- Custom JWT Filters  
+- Notification Service  
 
 ---
 
-## 🚀 Project Value
+# 🚀 Project Value
 
 This project demonstrates:
 
-- Full-stack development skills  
-- Authentication & Authorization workflow with JWT  
-- Clean layered architecture (Controllers, Services, Repositories)  
-- State management in React using Context & Hooks  
-- Real-time logic for notifications and UI synchronization  
-- A fully functional **CRUD + Dashboard system** ready for production  
+- Full-stack development expertise  
+- Authentication & Authorization workflow (JWT)  
+- Clean layered architecture  
+- Real-time notification logic  
+- State management with Context + Hooks  
+- A production-ready **CRUD + Dashboard** system  
+
+---
+
