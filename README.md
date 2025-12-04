@@ -1,4 +1,4 @@
-# 🧠 PatientApp — Clinical Session & Patient Management System
+# PatientApp — Clinical Session & Patient Management System
 
 ---
 
@@ -9,7 +9,7 @@ Built as a **full-stack project using React and Spring Boot**, it implements aut
 
 ---
 
-## 🌍 Problem Statement
+## Problem Statement
 
 Independent professionals often rely on fragmented tools (spreadsheets, messaging apps, paper notes) to manage:
 
@@ -25,7 +25,7 @@ This usually causes **errors, forgotten payments, double bookings, and lost info
 
 ---
 
-## 🎯 Main Objectives
+## Main Objectives
 
 - Centralize patient and session management  
 - Automate reminders and notifications  
@@ -36,7 +36,7 @@ This usually causes **errors, forgotten payments, double bookings, and lost info
 
 ---
 
-# 🧱 System Architecture
+# System Architecture
 
 ## Frontend (React)
 
@@ -62,7 +62,7 @@ This usually causes **errors, forgotten payments, double bookings, and lost info
 
 ---
 
-## ✅ Patient Management
+## Patient Management
 
 Create, edit, archive, delete, and search patients easily.
 
@@ -71,7 +71,7 @@ Create, edit, archive, delete, and search patients easily.
 
 ---
 
-## ✅ Session Calendar & Scheduling
+## Session Calendar & Scheduling
 
 View upcoming sessions, past appointments, and handle payment status.
 
@@ -91,7 +91,7 @@ View upcoming sessions, past appointments, and handle payment status.
 
 ---
 
-# 🗂️ Sessions Module
+# Sessions Module
 
 A complete module to manage all sessions in one place.
 
@@ -100,17 +100,17 @@ A complete module to manage all sessions in one place.
 
 ---
 
-## 📋 Sessions List  
+## Sessions List  
 ![Sessions List](assets/session1.png)
 
 ---
 
-## ⚙️ Session Actions  
+## Session Actions  
 ![Session Actions](assets/session2.png)
 
 ---
 
-## 💰 Financial Dashboard
+## Financial Dashboard
 
 Monitor income, pending payments, monthly analytics, and performance insights.
 
@@ -120,7 +120,7 @@ Monitor income, pending payments, monthly analytics, and performance insights.
 
 ---
 
-## 🔔 Smart Notifications (Auto-Generated)
+## Smart Notifications (Auto-Generated)
 
 The backend automatically generates notifications for:
 
@@ -136,7 +136,7 @@ Users can **mark as read**, **delete individually**, or **clear all**.
 
 ---
 
-## 💳 Patient Debt & Reminders
+## Patient Debt & Reminders
 
 Included inside the **Patient Dashboard** — send:
 
@@ -166,7 +166,7 @@ The entire application is optimized for use on:
 
 ---
 
-# ⭐ Tech Stack
+# Tech Stack
 
 ## Frontend
 - React  
@@ -188,7 +188,7 @@ The entire application is optimized for use on:
 
 ---
 
-# 🚀 Project Value
+# Project Value
 
 This project demonstrates:
 
