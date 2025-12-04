@@ -1,5 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { apiFetch } from "../api/apiFetch";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "../hooks/useToast.jsx"; 
+import { notificationsService } from "../services/notificationsService.js"; 
+
+
 
 const AuthContext = createContext();
 
@@ -9,7 +14,9 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
+  const toast = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
@@ -17,9 +24,13 @@ export function AuthProvider({ children }) {
 
     if (token && userData) {
       setUser(JSON.parse(userData));
+  
+      notificationsService.loadNotifications().catch(err => {
+        console.error("Falló cargar notificaciones al iniciar:", err);
+      });
     }
 
-    setLoading(false); 
+    setLoading(false);
   }, []);
 
   const login = async (username, password) => {
@@ -34,9 +45,26 @@ export function AuthProvider({ children }) {
 
       setUser(data.username);
 
-      window.location.href = "/agenda";
+      toast.info(`Bienvenido ${data.username} ✅`);
+
+      try {
+        const notis = await notificationsService.loadNotifications();
+     
+        if (Array.isArray(notis) && notis.length > 0) {
+          const unread = notis.filter(n => !n.leida).length;
+          if (unread > 0) {
+            toast.info(`Tenés ${unread} notificación(es) sin leer 🔔`);
+          }
+        }
+      } catch (err) {
+        console.error("Error al cargar notificaciones después del login:", err);
+      }
+
+   
+      navigate("/agenda");
+
     } catch (err) {
-      alert("Invalid credentials or server error");
+      toast.error("Credenciales inválidas o error en el servidor ❌");
       console.error(err);
     }
   };
@@ -45,7 +73,12 @@ export function AuthProvider({ children }) {
     setUser(null);
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
-    window.location.href = "/login";
+
+
+
+    toast.info("Sesión cerrada correctamente 👋");
+
+    navigate("/login");
   };
 
   return (

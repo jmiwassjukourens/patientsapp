@@ -18,9 +18,10 @@ import { ToastProvider } from "./hooks/useToast.jsx";
 function App() {
   return (
     <RequestProvider>
-    <AuthProvider>
+    
       <ToastProvider>
         <BrowserRouter>
+        <AuthProvider>
           
           <Navbar />
 
@@ -87,10 +88,11 @@ function App() {
           </main>
 
           <Footer />
+          </AuthProvider>
         </BrowserRouter>
       </ToastProvider>
          <GlobalLoader />
-    </AuthProvider>
+ 
     </RequestProvider>
   );
 }
