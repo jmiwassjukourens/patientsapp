@@ -59,12 +59,6 @@ These disconnected tools lead to **errors, forgotten payments, double bookings, 
 
 ---
 
-## 📸 Architecture Diagram
-
-> _(Replace when the image is available)_
-
----
-
 ## 🖥️ Features Overview
 
 ### ✅ Patient Management
@@ -166,13 +160,3 @@ This project demonstrates:
 - State management in React using Context & Hooks  
 - Real-time logic for notifications and UI synchronization  
 - A fully functional **CRUD + Dashboard system** ready for production  
-
----
-
-## 📌 Future Improvements
-
-- Appointment booking by patients  
-- Email & WhatsApp integration  
-- Advanced statistics & reports (PDF/Excel export)  
-- Multi-user / multi-clinic support  
-- Online payments integration
