@@ -3,6 +3,7 @@ package com.app.patients.security.filter;
 import static com.app.patients.security.TokenJwtConfig.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,6 +17,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.app.patients.entities.User;
+import com.app.patients.repositories.SessionRepository;
+import com.app.patients.services.NotificationService;
+import com.app.patients.services.UserService;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,8 +35,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private AuthenticationManager authenticationManager;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+    private UserService userService;
+
+    private SessionRepository sessionRepository;
+
+    private NotificationService notificationService;
+    
+
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager,UserService userService,SessionRepository sessionRepository,NotificationService notificationService) {
         this.authenticationManager = authenticationManager;
+        this.userService = userService;
+        this.sessionRepository = sessionRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -61,38 +75,64 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         return authenticationManager.authenticate(authenticationToken);
     }
 
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-            Authentication authResult) throws IOException, ServletException {
+@Override
+protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
+        Authentication authResult) throws IOException, ServletException {
 
-        org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authResult.getPrincipal();
-        String username = user.getUsername();
-        Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
+   
+    org.springframework.security.core.userdetails.User springUser =
+            (org.springframework.security.core.userdetails.User) authResult.getPrincipal();
+    String username = springUser.getUsername();
 
-        Claims claims = Jwts.claims()
-                .add("authorities", new ObjectMapper().writeValueAsString(roles))
-        .build();
+ 
+    com.app.patients.entities.User appUser = userService.getUserByUsername(username);
 
+    if (appUser.getLastLogin() == null || !appUser.getLastLogin().toLocalDate().isEqual(LocalDate.now())) {
+ 
+        Long numberOfSessionsToday = sessionRepository.countSessionsForToday(appUser.getId());
 
-        String token = Jwts.builder()
-                .subject(username)
-                .claims(claims)
-                .expiration(new Date(System.currentTimeMillis() + 3600000))
-                .issuedAt(new Date())
-                .signWith(SECRET_KEY)
-                .compact();
-
-        response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
-
-        Map<String, String> body = new HashMap<>();
-        body.put("token", token);
-        body.put("username", username);
-        body.put("message", String.format("Hello %s. has successfully logged in!", username));
-
-        response.getWriter().write(new ObjectMapper().writeValueAsString(body));
-        response.setContentType(CONTENT_TYPE);
-        response.setStatus(200);
+        if (numberOfSessionsToday != null && numberOfSessionsToday > 0) {
+            String message;
+            if (numberOfSessionsToday == 1) {
+                message = "Tenés 1 sesión agendada hoy";
+            } else {
+                message = "Tenés " + numberOfSessionsToday + " sesiones agendadas hoy";
+            }
+     
+            notificationService.createNotification("sesion", message, appUser);
+        }
     }
+
+ 
+    userService.updateLastLogin(username);
+
+
+    Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
+
+    Claims claims = Jwts.claims()
+            .add("authorities", new ObjectMapper().writeValueAsString(roles))
+    .build();
+
+    String token = Jwts.builder()
+            .subject(username)
+            .claims(claims)
+            .expiration(new Date(System.currentTimeMillis() + 3600000))
+            .issuedAt(new Date())
+            .signWith(SECRET_KEY)
+            .compact();
+
+    response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
+
+    Map<String, String> body = new HashMap<>();
+    body.put("token", token);
+    body.put("username", username);
+    body.put("message", String.format("Hello %s. has successfully logged in!", username));
+
+    response.getWriter().write(new ObjectMapper().writeValueAsString(body));
+    response.setContentType(CONTENT_TYPE);
+    response.setStatus(200);
+}
+
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,

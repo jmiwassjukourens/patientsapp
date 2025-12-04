@@ -18,8 +18,10 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     const sub = notificationsService.getNotifications().subscribe(setNotifications);
+    notificationsService.loadNotifications(); 
     return () => sub.unsubscribe();
   }, []);
+
 
   const openConfirmModal = (config) => setModalConfig({ ...config, show: true });
 

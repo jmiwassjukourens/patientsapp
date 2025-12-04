@@ -157,7 +157,7 @@ export default function PatientsPage() {
 
   const handleViewPending = (patient) => {
     navigate(
-      `/sesiones?estado=Pendiente&paciente=${encodeURIComponent(patient.name)}`
+      `/sesiones?estado=PENDIENTE&paciente=${encodeURIComponent(patient.name)}`
     );
   };
 

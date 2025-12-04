@@ -22,4 +22,8 @@ public interface UserService {
 
     User getAuthenticatedUser();
 
+    User getUserByUsername(String username);
+
+    public void updateLastLogin(String username);
+
 }

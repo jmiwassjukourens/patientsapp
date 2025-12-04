@@ -16,9 +16,11 @@ import com.app.patients.entities.Role;
 import com.app.patients.entities.Session;
 import com.app.patients.entities.SessionStatus;
 import com.app.patients.entities.User;
+import com.app.patients.repositories.NotificationRepository;
 import com.app.patients.repositories.PatientRepository;
 import com.app.patients.repositories.RoleRepository;
 import com.app.patients.repositories.UserRepository;
+import com.app.patients.services.NotificationService;
 @Component
 public class AppInitializer implements CommandLineRunner {
 
@@ -34,6 +36,12 @@ public class AppInitializer implements CommandLineRunner {
     @Autowired
     private PatientRepository patientRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
     @Override
     public void run(String... args) {
 
@@ -45,6 +53,8 @@ public class AppInitializer implements CommandLineRunner {
         User testUser = createTestUserIfNotExists(roles);
 
         createDefaultPatientsIfNotExists(testUser);
+
+        createInitialNotifications(testUser);
     }
 
     private Role createRoleIfNotExists(String roleName) {
@@ -71,7 +81,6 @@ public class AppInitializer implements CommandLineRunner {
         if (patientRepository.findByUser(user).size() > 0) {
             return;
         }
-
 
         Patient p1 = new Patient(
                 "Juan Perez",
@@ -106,7 +115,6 @@ public class AppInitializer implements CommandLineRunner {
         p1.setDebt(0.0);
 
 
-
         Patient p2 = new Patient(
                 "María Gómez",
                 "87654321",
@@ -134,7 +142,7 @@ public class AppInitializer implements CommandLineRunner {
         s6.setPatient(p2);
 
         p2.getSessions().addAll(Arrays.asList(s4, s5, s6));
-        p2.setDebt(6000.0 * 3); // 18k de deuda
+        p2.setDebt(6000.0 * 3);
 
 
         Patient p3 = new Patient(
@@ -153,7 +161,7 @@ public class AppInitializer implements CommandLineRunner {
         s7.setPatient(p3);
 
         Session s8 = new Session();
-        s8.setFecha(LocalDateTime.now().minusDays(4));
+        s8.setFecha(LocalDateTime.now());
         s8.setPrecio(4000.0);
         s8.setEstado(SessionStatus.PENDIENTE);
         s8.setPatient(p3);
@@ -165,14 +173,39 @@ public class AppInitializer implements CommandLineRunner {
         s9.setPatient(p3);
 
         p3.getSessions().addAll(Arrays.asList(s7, s8, s9));
-        p3.setDebt(4000.0 * 2); // 8k de deuda
-
-
+        p3.setDebt(4000.0 * 2);
 
         patientRepository.save(p1);
         patientRepository.save(p2);
         patientRepository.save(p3);
 
-        System.out.println("📌 Pacientes iniciales creados con sesiones pagadas, impagas y mixtas.");
+        System.out.println("📌 Pacientes iniciales creados.");
+    }
+
+    private void createInitialNotifications(User user) {
+
+        if (!notificationRepository.findByUser(user).isEmpty()) {
+            return;
+        }
+
+        notificationService.createNotification(
+                "financiera",
+                "💰 Tenés 3 sesiones pendientes de pago.",
+                user
+        );
+
+        notificationService.createNotification(
+                "analitica",
+                "🚀 Tu tasa de asistencia subió un 15% este mes.",
+                user
+        );
+
+        notificationService.createNotification(
+                "cliente",
+                "🧾 El cliente Ana tiene saldo pendiente desde el 03/10.",
+                user
+        );
+
+        System.out.println("🔔 Notificaciones iniciales creadas.");
     }
 }

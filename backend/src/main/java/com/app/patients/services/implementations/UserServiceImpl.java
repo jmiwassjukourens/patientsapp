@@ -1,5 +1,6 @@
 package com.app.patients.services.implementations;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -96,13 +97,10 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public User update(Long id, User userDetails) {
-        System.out.println("pasa por aqui 4");
+
         User existingUser = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
-        System.out.println("pasa por aqui 5");
-        System.out.println(existingUser.getId());
-        System.out.println(existingUser.getUsername());
-        System.out.println(existingUser.getRoles());
+
         
         // Actualizar campos necesarios
         existingUser.setUsername(userDetails.getUsername());
@@ -131,6 +129,17 @@ public class UserServiceImpl implements UserService{
     }
 
     
+    @Transactional
+    public void updateLastLogin(String username) {
+        repository.updateLastLogin(username, LocalDateTime.now());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User getUserByUsername(String username){
     
+        return repository.getUserByUsername(username);
+    }
+
     
 }

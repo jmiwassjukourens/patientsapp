@@ -33,9 +33,9 @@ public class JpaUserDetailsService implements UserDetailsService {
         }
 
         User user = userOptional.orElseThrow();
-        System.out.println("el usuario essss");
+
         System.out.println(user.getUsername());
-        System.out.println("la contraseña essss");
+
         System.out.println(user.getPassword());
 
         List<GrantedAuthority> authorities = user.getRoles().stream()

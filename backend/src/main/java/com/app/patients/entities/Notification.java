@@ -20,7 +20,6 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // financiera / sesion / analitica / cliente
     @Column(nullable = false)
     private String tipo;
 
@@ -45,4 +44,36 @@ public class Notification {
     //constructor
     public Notification() {
     }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public String getTipo() {
+        return tipo;
+    }
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+    public String getMensaje() {
+        return mensaje;
+    }
+    public void setMensaje(String mensaje) {
+        this.mensaje = mensaje;
+    }
+    public boolean isLeida() {
+        return leida;
+    }
+    public void setLeida(boolean leida) {
+        this.leida = leida;
+    }
+    public User getUser() {
+        return user;
+    }
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    
 }

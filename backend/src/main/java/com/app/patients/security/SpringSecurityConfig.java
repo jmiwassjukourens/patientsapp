@@ -19,8 +19,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import com.app.patients.repositories.SessionRepository;
 import com.app.patients.security.filter.JwtAuthenticationFilter;
 import com.app.patients.security.filter.JwtValidationFilter;
+import com.app.patients.services.NotificationService;
 
 import java.util.Arrays;
 
@@ -31,24 +33,33 @@ public class SpringSecurityConfig {
     @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
 
+    @Autowired
+    private com.app.patients.services.UserService userService;
+
+    @Autowired
+    private SessionRepository sessionRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
     @Bean
     AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public SpringSecurityConfig(PasswordEncoder passwordEncoder) {
+        new BCryptPasswordEncoder();
     }
+
+
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests((authz) -> authz
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users").permitAll()
                 // .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN"))
                 .anyRequest().authenticated())
-                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager(),userService,sessionRepository,notificationService))
                 .addFilter(new JwtValidationFilter(authenticationManager()))
                 .csrf(config -> config.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
