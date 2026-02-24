@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import styles from "./PatientFormModal.module.css";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  TextField,
+  Stack,
+} from "@mui/material";
 
 export default function PatientFormModal({ open, onClose, onSubmit, initialData }) {
   const [form, setForm] = useState({
@@ -25,62 +33,66 @@ export default function PatientFormModal({ open, onClose, onSubmit, initialData 
     onSubmit(payload);
   };
 
-  if (!open) return null;
-
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <h3>{initialData ? "Editar paciente" : "Dar alta paciente"}</h3>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <input
-            type="text"
-            name="name"
-            placeholder="Nombre y apellido"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="dni"
-            placeholder="DNI"
-            value={form.dni}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="phone"
-            placeholder="Teléfono"
-            value={form.phone}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="debt"
-            placeholder="Deuda"
-            value={form.debt}
-            onChange={handleChange}
-          />
-
-          <div className={styles.buttons}>
-            <button type="submit" className={styles.saveBtn}>
-              {initialData ? "Guardar cambios" : "Guardar"}
-            </button>
-            <button type="button" className={styles.cancelBtn} onClick={onClose}>
-              Cancelar
-            </button>
-          </div>
+    <Dialog open={!!open} onClose={onClose} aria-labelledby="patient-form-title">
+      <DialogTitle id="patient-form-title">
+        {initialData ? "Editar paciente" : "Dar alta paciente"}
+      </DialogTitle>
+      <DialogContent dividers>
+        <form id="patient-form" onSubmit={handleSubmit}>
+          <Stack spacing={1.25}>
+            <TextField
+              label="Nombre y apellido"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              fullWidth
+              required
+              inputProps={{ autoFocus: true }}
+            />
+            <TextField
+              label="DNI"
+              name="dni"
+              value={form.dni}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Teléfono"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Deuda"
+              name="debt"
+              type="number"
+              value={form.debt}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Stack>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="inherit">
+          Cancelar
+        </Button>
+        <Button type="submit" form="patient-form" variant="contained">
+          {initialData ? "Guardar cambios" : "Guardar"}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

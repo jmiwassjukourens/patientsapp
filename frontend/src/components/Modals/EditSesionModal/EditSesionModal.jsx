@@ -1,12 +1,9 @@
 import { useEffect } from "react";
 import SessionForm from "../../SessionForm/SessionForm";
-import styles from "./EditSesionModal.module.css";
+import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 
 function EditSesionModal({ sesion, onUpdate, onCancel }) {
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => (document.body.style.overflow = "auto");
-  }, []);
+  useEffect(() => {}, []);
 
 const handleSubmit = (data) => {
   const sesionEditada = {
@@ -21,22 +18,26 @@ const handleSubmit = (data) => {
 };
 
   return (
-    <div className={styles.backdrop} onClick={onCancel}>
-      <div
-        className={styles.modal}
-        onClick={(e) => e.stopPropagation()} 
-      >
-        <button className={styles.closeBtn} onClick={onCancel}>
-          ✖
-        </button>
+    <Dialog open={!!sesion} onClose={onCancel} aria-labelledby="edit-session-title">
+      <DialogTitle id="edit-session-title" sx={{ pr: 6 }}>
+        Editar sesión
+        <IconButton
+          aria-label="Cerrar"
+          onClick={onCancel}
+          sx={{ position: "absolute", right: 10, top: 10 }}
+        >
+          <span aria-hidden="true">✕</span>
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers>
         <SessionForm
           title="Editar Sesión"
           initialData={sesion}
           onSubmit={handleSubmit}
           onCancel={onCancel}
         />
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

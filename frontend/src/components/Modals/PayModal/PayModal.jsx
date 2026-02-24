@@ -39,37 +39,13 @@ export function PayModal({ open, onClose, onConfirm, sesion }) {
     <Dialog
       open={open}
       onClose={onClose}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        style: {
-          borderRadius: "16px",
-          padding: "8px 0",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          backgroundColor: "#fdfdfd",
-        },
-      }}
     >
-      <DialogTitle
-        style={{
-          fontWeight: 600,
-          fontSize: "1.3rem",
-          textAlign: "center",
-          paddingBottom: "4px",
-          color: "#2e7d32",
-        }}
-      >
+      <DialogTitle>
         Registrar pago
       </DialogTitle>
 
       <DialogContent
         dividers
-        style={{
-          padding: "16px 24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-        }}
       >
         <p style={{ margin: 0 }}>
           Vas a registrar el pago de la sesión con{" "}
@@ -98,13 +74,7 @@ export function PayModal({ open, onClose, onConfirm, sesion }) {
         />
       </DialogContent>
 
-      <DialogActions
-        style={{
-          padding: "12px 20px",
-          justifyContent: "flex-end",
-          gap: "8px",
-        }}
-      >
+      <DialogActions>
         <Button onClick={onClose} color="inherit">
           Cancelar
         </Button>
@@ -112,10 +82,6 @@ export function PayModal({ open, onClose, onConfirm, sesion }) {
           onClick={handleConfirm}
           variant="contained"
           color="success"
-          style={{
-            textTransform: "none",
-            fontWeight: 600,
-          }}
         >
           Confirmar pago
         </Button>

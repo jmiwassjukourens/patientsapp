@@ -10,6 +10,8 @@ import CalendarGrid from "../../components/CalendarGrid/CalendarGrid";
 import AgendaFilterBar from "../../components/CalendarGrid/AgendaFiltersBar";
 import SessionModal from "../../components/Modals/SessionModal/SessionModal";
 import styles from "./AgendaPage.module.css";
+import AppShell from "../../components/layout/AppShell/AppShell";
+import { Button } from "@mui/material";
 
 export default function AgendaPage() {
   const today = new Date();
@@ -114,32 +116,26 @@ const handleReschedule = async (session, nuevaFecha) => {
   }, [sessions, monthStart, monthEnd]);
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.header}>
-        <div className={styles.titleBlock}>
-          <h2 className={styles.title}>Agenda</h2>
-          <p className={styles.subtitle}>
-            De la búsqueda a la gestión, en segundos
-          </p>
-          <div className={styles.headerControls}>
-            <button
-              className={styles.toggleActionsBtn}
-              onClick={() => setShowActions((prev) => !prev)}
-            >
-              {showActions ? "Ocultar acciones" : "Mostrar acciones"}
-            </button>
-          </div>
-        </div>
-
-        <div className={styles.controls}>
+    <AppShell
+      title="Agenda"
+      subtitle="Planificación con lectura rápida y acciones contextuales"
+      actions={
+        <>
           <div className={styles.currentMonthLabel}>
             {displayedMonth.toLocaleDateString("es-ES", {
               month: "long",
               year: "numeric",
             })}
           </div>
-        </div>
-      </div>
+          <Button
+            variant="outlined"
+            onClick={() => setShowActions((prev) => !prev)}
+          >
+            {showActions ? "Ocultar acciones" : "Mostrar acciones"}
+          </Button>
+        </>
+      }
+    >
 
       <AgendaFilterBar
         displayedMonth={displayedMonth}
@@ -171,6 +167,6 @@ const handleReschedule = async (session, nuevaFecha) => {
         onSavePeriodic={handleCreatePeriodic}
       />
     )}
-    </div>
+    </AppShell>
   );
 }

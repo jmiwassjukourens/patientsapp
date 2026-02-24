@@ -1,10 +1,10 @@
 .header {
-  background-color: #FF8C42;
+  background-color: var(--color-surface);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.3rem 1.2rem;
-  box-shadow: 0 2px 8px rgba(255, 140, 66, 0.4);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .logo {
@@ -19,7 +19,7 @@
 .menuToggle {
   display: none;
   background: none;
-  color: #FFFFFF;
+  color: var(--color-ink);
   font-size: 2rem;
   border: none;
   cursor: pointer;
@@ -34,7 +34,7 @@
 
 .navList li a,
 .logout {
-  color: #FFFFFF;
+  color: var(--color-ink);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
@@ -48,7 +48,7 @@
   left: 0;
   width: 0%;
   height: 2px;
-  background-color: #FFEEDB;
+  background-color: var(--color-primary);
   transition: width 0.3s ease-in-out;
   border-radius: 2px;
 }
@@ -59,7 +59,7 @@
 
 .navList li a:hover,
 .logout:hover {
-  color: #FFEEDB;
+  color: var(--color-primary);
 }
 
 .logout {
@@ -87,7 +87,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: #FF8C42;
+  background-color: var(--color-surface);
   list-style: none;
   padding: 0.5rem 0;
   margin: 0;
@@ -95,7 +95,8 @@
   visibility: hidden;
   transform: translateY(-5px);
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(255, 140, 66, 0.4);
+  box-shadow: var(--shadow-2);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   min-width: 180px;
 }
@@ -108,13 +109,13 @@
 
 .submenu li a {
   display: block;
-  color: #fff;
+  color: var(--color-ink);
   padding: 0.5rem 1rem;
   text-decoration: none;
 }
 
 .submenu li a:hover {
-  background-color: #FF9C5C;
+  background-color: var(--color-primary-soft);
 }
 
 
@@ -122,7 +123,7 @@
   .navList {
     flex-direction: column;
     position: absolute;
-    background: #FF8C42;
+    background: var(--color-surface);
     left: 0;
     width: 100%;
     overflow: hidden;
@@ -130,6 +131,7 @@
     padding: 0 1rem;
     opacity: 0;
     transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .active .navList {
@@ -150,27 +152,11 @@
 
 
 .notificationBadge {
-  background: #ef5350;
-  color: white;
-  border-radius: 50%;
-  padding: 2px 7px;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border: 1px solid rgba(178, 58, 72, 0.25);
+  border-radius: 999px;
+  padding: 1px 8px;
   font-size: 0.8rem;
-  animation: pulse 1.6s infinite;
-  box-shadow: 0 0 0 rgba(239, 83, 80, 0.6);
-  transition: transform 0.2s ease;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.6);
-  }
-  70% {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 8px rgba(239, 83, 80, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(239, 83, 80, 0);
-  }
+  font-weight: 600;
 }

@@ -5,6 +5,8 @@ import PatientCard from "../../components/PatientCard/PatientCard";
 import PatientFormModal from "../../components/Modals/PatientFormModal/PatientFormModal";
 import ConfirmModal from "../../components/Modals/ConfirmModal/ConfirmModal.jsx";
 import { useNavigate } from "react-router-dom";
+import AppShell from "../../components/layout/AppShell/AppShell";
+import { Button, Stack } from "@mui/material";
 import {
   fetchPatients,
   createPatient,
@@ -167,8 +169,26 @@ export default function PatientsPage() {
 
 
   return (
-    <div className={styles.pageContainer}>
-      <h2 className={styles.title}>Pacientes</h2>
+    <AppShell
+      title="Pacientes"
+      subtitle="Gestión clínica rápida, consistente y sin distracciones"
+      actions={
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+          <Button variant="outlined" onClick={handleNotifyAll}>
+            Notificar deuda (todos)
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setEditingPatient(null);
+              setOpenForm(true);
+            }}
+          >
+            Dar alta paciente
+          </Button>
+        </Stack>
+      }
+    >
 
       <PatientsFilterBar
         filterName={filterName}
@@ -176,22 +196,6 @@ export default function PatientsPage() {
         filterDebt={filterDebt}
         setFilterDebt={setFilterDebt}
       />
-
-      <div className={styles.actionsRow}>
-        <button className={styles.notifyAllBtn} onClick={handleNotifyAll}>
-          📢 Notificar a todos los pacientes con deuda
-        </button>
-
-        <button
-          className={styles.addBtn}
-          onClick={() => {
-            setEditingPatient(null);
-            setOpenForm(true);
-          }}
-        >
-          ➕ Dar alta paciente
-        </button>
-      </div>
 
       <div className={styles.cardsGrid}>
         {filtered.map((p) => (
@@ -229,6 +233,6 @@ export default function PatientsPage() {
         cancelText="Cancelar"
         confirmColor="danger"
       />
-    </div>
+    </AppShell>
   );
 }

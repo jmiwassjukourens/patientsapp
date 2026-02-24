@@ -1,12 +1,28 @@
 import { useState, useEffect } from "react";
-import styles from "./SessionModal.module.css";
 import {
   backendISOToInputLocal,
   inputLocalToBackendLocalDateTime,
-  inputLocalToDate,
 } from "../../../utils/dateUtils.js";
 import { fetchPatients } from "../../../services/PatientService.js"; 
 import { useToast } from "../../../hooks/useToast.jsx";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+  Paper,
+} from "@mui/material";
 
 export default function SessionModal({
   sesion = null,
@@ -133,7 +149,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!fecha || !patientId) {
-    alert("Completá la fecha y seleccioná un paciente.");
+    toast.error("Completá la fecha y seleccioná un paciente.");
     return;
   }
 
@@ -185,112 +201,129 @@ const handleSubmit = async (e) => {
 
 
   return (
-    <div className={styles.backdrop} onClick={onCancel}>
-      <div className={styles.modal} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h3>{sesion ? "✏️ Editar sesión" : "🗓️ Nueva sesión"}</h3>
-            <button
-              className={styles.closeBtn}
-              onClick={onCancel}
-              aria-label="Cerrar"
-            >
-              ✖
-            </button>
+    <Dialog open={true} onClose={onCancel} aria-labelledby="session-dialog-title">
+      <DialogTitle id="session-dialog-title" sx={{ pr: 6 }}>
+        {sesion ? "Editar sesión" : "Nueva sesión"}
+        <Button
+          onClick={onCancel}
+          color="inherit"
+          sx={{ position: "absolute", right: 10, top: 10, minWidth: 0, px: 1 }}
+          aria-label="Cerrar"
+        >
+          ✕
+        </Button>
+      </DialogTitle>
 
-        </div>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.row}>
-            <label>
-              Fecha y hora
-              <input
+      <DialogContent dividers>
+        <form id="session-form" onSubmit={handleSubmit}>
+          <Stack spacing={1.25}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
+              <TextField
+                label="Fecha y hora"
                 type="datetime-local"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
+                fullWidth
                 required
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ autoFocus: true }}
               />
-            </label>
-
-            <label>
-              Precio
-              <input
+              <TextField
+                label="Precio"
                 type="number"
                 value={precio}
                 onChange={(e) => setPrecio(e.target.value)}
-                min="0"
+                fullWidth
+                inputProps={{ min: 0 }}
               />
-            </label>
-          </div>
+            </Stack>
 
-          <label>
-            Paciente
-            <select
-              value={patientId ?? ""}
-              onChange={(e) => {
-                const val = e.target.value;
-                setPatientId(val ? Number(val) : null);
-                const selected = patients.find((p) => p.id === Number(val));
-                setNombre(selected?.name ?? "");
-              }}
-              required
-            >
-              <option value="">Seleccioná un paciente...</option>
-              {patients.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
+            <FormControl fullWidth required size="small">
+              <InputLabel id="patient-select-label">Paciente</InputLabel>
+              <Select
+                labelId="patient-select-label"
+                label="Paciente"
+                value={patientId ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPatientId(val ? Number(val) : null);
+                  const selected = patients.find((p) => p.id === Number(val));
+                  setNombre(selected?.name ?? "");
+                }}
+              >
+                <MenuItem value="">
+                  <em>Seleccioná un paciente…</em>
+                </MenuItem>
+                {patients.map((p) => (
+                  <MenuItem key={p.id} value={p.id}>
+                    {p.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-          <div className={styles.divider} />
+            <Divider />
 
-          <label className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={recurrente}
-              onChange={(e) => setRecurrente(e.target.checked)}
-            />
-            Crear periódicamente (se generarán sesiones semanales)
-          </label>
-
-          {recurrente && (
-            <div className={styles.recurrenceBox}>
-              <label>
-                Día de la semana
-                <select value={diaSemana} onChange={(e) => setDiaSemana(e.target.value)}>
-                  <option value="0">Domingo</option>
-                  <option value="1">Lunes</option>
-                  <option value="2">Martes</option>
-                  <option value="3">Miércoles</option>
-                  <option value="4">Jueves</option>
-                  <option value="5">Viernes</option>
-                  <option value="6">Sábado</option>
-                </select>
-              </label>
-
-              <label>
-                Fecha límite
-                <input
-                  type="date"
-                  value={fechaLimite}
-                  onChange={(e) => setFechaLimite(e.target.value)}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={recurrente}
+                  onChange={(e) => setRecurrente(e.target.checked)}
                 />
-              </label>
-            </div>
-          )}
+              }
+              label={
+                <Typography variant="body2">
+                  Crear periódicamente (se generarán sesiones semanales)
+                </Typography>
+              }
+            />
 
-          <div className={styles.actions}>
-            <button type="button" className={styles.cancel} onClick={onCancel}>
-              Cancelar
-            </button>
+            {recurrente && (
+              <Paper sx={{ p: 1.25 }}>
+                <Stack spacing={1.25}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="dow-label">Día de la semana</InputLabel>
+                      <Select
+                        labelId="dow-label"
+                        label="Día de la semana"
+                        value={diaSemana}
+                        onChange={(e) => setDiaSemana(e.target.value)}
+                      >
+                        <MenuItem value="0">Domingo</MenuItem>
+                        <MenuItem value="1">Lunes</MenuItem>
+                        <MenuItem value="2">Martes</MenuItem>
+                        <MenuItem value="3">Miércoles</MenuItem>
+                        <MenuItem value="4">Jueves</MenuItem>
+                        <MenuItem value="5">Viernes</MenuItem>
+                        <MenuItem value="6">Sábado</MenuItem>
+                      </Select>
+                    </FormControl>
 
-            <button type="submit" className={styles.save}>
-              {sesion ? "Guardar cambios" : "Crear"}
-            </button>
-          </div>
+                    <TextField
+                      label="Fecha límite"
+                      type="date"
+                      value={fechaLimite}
+                      onChange={(e) => setFechaLimite(e.target.value)}
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Stack>
+                </Stack>
+              </Paper>
+            )}
+          </Stack>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={onCancel} color="inherit">
+          Cancelar
+        </Button>
+        <Button type="submit" form="session-form" variant="contained">
+          {sesion ? "Guardar cambios" : "Crear"}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

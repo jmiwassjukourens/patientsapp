@@ -28,60 +28,15 @@ export function DeleteModal({ open, onClose, onConfirm, sesion }) {
     <Dialog
       open={open}
       onClose={onClose}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        style: {
-          borderRadius: "16px",
-          padding: "8px 0",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          backgroundColor: "#fff",
-        },
-      }}
     >
-      <DialogTitle
-        style={{
-          fontWeight: 600,
-          fontSize: "1.3rem",
-          textAlign: "center",
-          color: "#c62828",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "8px",
-        }}
-      >
-        <span
-          style={{
-            display: "inline-block",
-            animation: "pulse 1s infinite",
-          }}
-        >
-          ⚠️
-        </span>
+      <DialogTitle>
         Eliminar sesión
       </DialogTitle>
 
-      <style>
-        {`
-          @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-          }
-        `}
-      </style>
-
       <DialogContent
         dividers
-        style={{
-          padding: "16px 24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-        }}
       >
-        <p style={{ fontSize: "0.95rem", color: "#333" }}>
+        <p style={{ fontSize: "0.95rem" }}>
           Estás a punto de eliminar permanentemente la sesión de{" "}
           <strong>{sesion.paciente.nombre}</strong> con la fecha y horario:{" "}
           {new Date(sesion.fecha).toLocaleString()}.<br />
@@ -89,22 +44,14 @@ export function DeleteModal({ open, onClose, onConfirm, sesion }) {
         </p>
       </DialogContent>
 
-      <DialogActions
-        style={{
-          padding: "12px 20px",
-          justifyContent: "flex-end",
-          gap: "8px",
-        }}
-      >
-        <Button onClick={onClose}>Cerrar</Button>
+      <DialogActions>
+        <Button onClick={onClose} color="inherit">
+          Cerrar
+        </Button>
         <Button
           onClick={handleConfirm}
           color="error"
           variant="contained"
-          style={{
-            textTransform: "none",
-            fontWeight: 600,
-          }}
         >
           Confirmar eliminación
         </Button>

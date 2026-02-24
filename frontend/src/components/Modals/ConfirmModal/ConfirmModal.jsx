@@ -1,5 +1,11 @@
-import { motion, AnimatePresence } from "framer-motion";
-import styles from "./ConfirmModal.module.css";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  Typography,
+} from "@mui/material";
 
 export default function ConfirmModal({
   show,
@@ -9,43 +15,31 @@ export default function ConfirmModal({
   message = "¿Estás seguro de realizar esta acción?",
   confirmText = "Confirmar",
   cancelText = "Cancelar",
-  confirmColor = "danger", 
+  confirmColor = "danger",
 }) {
-  const confirmBtnClass =
+  const muiColor =
     confirmColor === "danger"
-      ? styles.btnDelete
+      ? "error"
       : confirmColor === "warning"
-      ? styles.btnWarn
-      : styles.btnConfirm;
+        ? "warning"
+        : "primary";
 
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          className={styles.overlay}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className={styles.modal}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-          >
-            <h3 className={styles.title}>{title}</h3>
-            <p className={styles.message}>{message}</p>
-            <div className={styles.buttons}>
-              <button onClick={onClose} className={styles.btnCancel}>
-                {cancelText}
-              </button>
-              <button onClick={onConfirm} className={confirmBtnClass}>
-                {confirmText}
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <Dialog open={!!show} onClose={onClose} aria-labelledby="confirm-dialog-title">
+      <DialogTitle id="confirm-dialog-title">{title}</DialogTitle>
+      <DialogContent dividers>
+        <Typography variant="body2" color="text.secondary">
+          {message}
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="inherit">
+          {cancelText}
+        </Button>
+        <Button onClick={onConfirm} variant="contained" color={muiColor}>
+          {confirmText}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
